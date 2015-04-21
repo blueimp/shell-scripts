@@ -1,0 +1,47 @@
+webdata:
+  # Mapping host volume for development:
+  image: busybox
+  volumes:
+  - "../web:/srv/www/dev.test"
+mongodbdata:
+  image: develop/mongodbdata
+redisdata:
+  image: develop/redisdata
+mongodb:
+  image: develop/mongodb
+  volumes_from:
+  - mongodbdata
+  # Debug access:
+  ports:
+  - "27017:27017"
+redis:
+  image: develop/redis
+  volumes_from:
+  - redisdata
+  # Debug access:
+  ports:
+  - "6379:6379"
+php:
+  image: develop/php
+  links:
+  - mongodb
+  - redis
+  volumes_from:
+  - webdata
+cron:
+  image: develop/php
+  links:
+  - mongodb
+  - redis
+  volumes_from:
+  - webdata
+  entrypoint: "cronservice"
+nginx:
+  image: develop/nginx
+  links:
+  - php
+  volumes_from:
+  - webdata
+  ports:
+  - "80:80"
+  - "443:443"

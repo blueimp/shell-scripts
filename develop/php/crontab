@@ -1,0 +1,18 @@
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+LOGFILE=/var/log/cron.log
+
+# * * * * * root log date
+# │ │ │ │ │ │    │
+# │ │ │ │ │ │    └─ command to execute
+# │ │ │ │ │ └─ user to execute the command with
+# │ │ │ │ └───── day of week (0 - 6, Sunday to Saturday)
+# │ │ │ └────────── month (1 - 12)
+# │ │ └─────────────── day of month (1 - 31)
+# │ └──────────────────── hour (0 - 23)
+# └───────────────────────── min (0 - 59)
+
+# Truncate the log file each day to zero size:
+59 23 * * * root truncate -s0 $LOGFILE
+
+# Log the current date every 5 minutes:
+*/5 * * * * root log date
