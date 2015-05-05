@@ -68,7 +68,7 @@ docker-compose up -d
 open https://dev.test/
 ```
 
-### Use mongorestore, mongodump, php and composer:
+### Use mongorestore, mongodump, php, phpunit and composer:
 
 ```sh
 source .env
@@ -78,6 +78,8 @@ mongorestore --version
 mongodump --version
 
 php --version
+
+phpunit --version
 
 composer status -d dev.test
 ```
