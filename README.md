@@ -68,19 +68,34 @@ docker-compose up -d
 open https://dev.test/
 ```
 
-### Use mongorestore, mongodump, php, phpunit and composer:
+### Use php, phpunit, composer, redis-cli, mongo, mongorestore, mongodump:
+
+Aliases for container binaries are set via `source .env`:
 
 ```sh
 source .env
-
-mongorestore --version
-
-mongodump --version
 
 php --version
 
 phpunit --version
 
+composer --version
+
+redis-cli --version
+
+mongo --version
+
+mongorestore --version
+
+mongodump --version
+```
+
+#### Command Working directory
+
+The working directory for a binary is set to that of its container, e.g. `/srv/www` for the `$PHP_CONTAINER` and its php binaries.  
+As a result, we have to take this working directory into account when executing the commands, e.g.:
+
+```sh
 composer status -d dev.test
 ```
 
