@@ -1,0 +1,20 @@
+# Set the default log level:
+es.logger.level: INFO
+
+# Log to console:
+rootLogger: ${es.logger.level}, console
+
+# Adjust specific logger levels:
+logger:
+  # Log action execution errors for easier debugging:
+  action: DEBUG
+  # Reduce the logging for aws, too much is logged under the default INFO:
+  com.amazonaws: WARN
+
+# Define logging destinations:
+appender:
+  console:
+    type: console
+    layout:
+      type: consolePattern
+      conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"

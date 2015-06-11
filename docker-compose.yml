@@ -7,6 +7,8 @@ mongodbdata:
   image: develop/mongodbdata
 redisdata:
   image: develop/redisdata
+elasticsearchdata:
+  image: develop/elasticsearchdata
 mongodb:
   image: develop/mongodb
   volumes_from:
@@ -21,11 +23,19 @@ redis:
   # Debug access:
   ports:
   - "6379:6379"
+elasticsearch:
+  image: develop/elasticsearch
+  volumes_from:
+  - elasticsearchdata
+  # Debug access:
+  ports:
+  - "9200:9200"
 php:
   image: develop/php
   links:
   - mongodb
   - redis
+  - elasticsearch
   volumes_from:
   - webdata
 cron:
@@ -33,6 +43,7 @@ cron:
   links:
   - mongodb
   - redis
+  - elasticsearch
   volumes_from:
   - webdata
   entrypoint: "cronservice"
