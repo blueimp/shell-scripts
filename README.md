@@ -1,4 +1,4 @@
-# nginx+php+redis+mongodb with docker
+# nginx+php+redis+mongodb+elasticsearch with docker
 
 ## Requirements
 
