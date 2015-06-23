@@ -63,7 +63,7 @@ docker-compose up -d
 ### Update the hosts file and open the development website:
 
 ```sh
-./update-hosts.sh dev.test
+./scripts/update-hosts.sh dev.test
 
 open https://dev.test/
 ```
