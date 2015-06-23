@@ -8,32 +8,33 @@ Before starting the setup process, install the following software:
 
 For Mac OS X, please see [blueimp/boot2docker](https://github.com/blueimp/boot2docker).
 
-For other operating systems, please follow the official [docker installation instructions](http://docs.docker.com/installation/#installation).
+For other operating systems, please follow the official [docker installation instructions](http://docs.docker.com/installation/).
 
 ### docker-compose
 
-Please follow the official [docker compose installation instructions](http://docs.docker.com/compose/install/#install-compose).
+Please follow the official [docker compose installation instructions](http://docs.docker.com/compose/install/).
 
 ## Setup
 
 ### Generate a self-signed SSL certificate for nginx:
 
 ```sh
-mkdir develop/nginx/ssl
+mkdir -p secrets/ssl
 
 openssl req -nodes -new -x509 \
-	-keyout develop/nginx/ssl/dev.test.key \
-	-out develop/nginx/ssl/dev.test.crt
+	-keyout secrets/ssl/dev.test.key \
+	-out secrets/ssl/dev.test.crt
 ```
 
 ### Generate SSH keypair and known hosts file for git access:
 
 ```sh
-mkdir develop/php/ssh
+mkdir -p secrets/ssh
 
-ssh-keygen -t rsa -C docker -N "" -f develop/php/ssh/id_rsa
+ssh-keygen -t rsa -C deploy -N "" -f secrets/ssh/id_rsa
 
-ssh-keyscan github.com >> develop/php/ssh/known_hosts
+ssh-keyscan github.com >> secrets/ssh/known_hosts
+ssh-keyscan bitbucket.org >> secrets/ssh/known_hosts
 ```
 
 ### Edit SSMTP configuration settings (except AuthPass):
@@ -92,7 +93,7 @@ mongodump --version
 
 #### Command Working directory
 
-The working directory for a binary is set to that of its container, e.g. `/srv/www` for the `$PHP_CONTAINER` and its php binaries.  
+The working directory for a binary is set to that of its container, e.g. `/srv/www` for the php container and its php binaries.  
 As a result, we have to take this working directory into account when executing the commands, e.g.:
 
 ```sh
