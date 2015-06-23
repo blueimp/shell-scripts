@@ -20,5 +20,3 @@ VOLUME /var/www/.ssh
 VOLUME /root/.ssh
 
 ENTRYPOINT ["secretconfig"]
-
-LABEL test.dev.service=secretconfig

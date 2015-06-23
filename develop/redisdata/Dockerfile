@@ -10,5 +10,3 @@ VOLUME /data/redis
 WORKDIR /data/redis
 
 CMD ["echo", "redis data"]
-
-LABEL test.dev.service=redisdata

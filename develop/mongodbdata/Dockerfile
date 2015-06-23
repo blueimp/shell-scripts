@@ -10,5 +10,3 @@ VOLUME /data/db
 WORKDIR /data/db
 
 CMD ["echo", "mongodb data"]
-
-LABEL test.dev.service=mongodbdata

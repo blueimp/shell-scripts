@@ -10,5 +10,3 @@ VOLUME /usr/share/elasticsearch/data
 WORKDIR /usr/share/elasticsearch/data
 
 CMD ["echo", "elasticsearch data"]
-
-LABEL test.dev.service=elasticsearchdata
