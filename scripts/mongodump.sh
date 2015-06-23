@@ -2,18 +2,21 @@
 
 #
 # Run mongodump in a docker container.
-# Usage: MONGODB_CONTAINER=CONTAINER_NAME ./mongodump.sh [ARGS...]
-# 
+# Usage: MONGODB_CONTAINER=CONTAINER_ID ./mongodump.sh [ARGS...]
+#
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net
-# 
+#
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/MIT
 #
 
+# Exit immediately if a command exits with a non-zero status:
+set -e
+
 if [[ -z "$MONGODB_CONTAINER" ]]
 then
-	echo "Usage: MONGODB_CONTAINER=CONTAINER_NAME $0" >&2
+	echo "Usage: MONGODB_CONTAINER=CONTAINER_ID $0" >&2
 	exit 1
 fi
 
@@ -29,10 +32,8 @@ function cleanup() {
 	rm -rf "$TMPDIR"
 }
 
-function fail() {
-	cleanup
-	exit 1
-}
+# Clean up on exit:
+trap "EXITCODE=$?; cleanup; exit $EXITCODE" SIGTERM EXIT
 
 HOSTDIR=""
 
@@ -56,12 +57,12 @@ then
 	set -- "$@" --out "$TMPDIR"
 fi
 
-mkdir -p "$HOSTDIR" || fail
-cd "$HOSTDIR" || fail
+mkdir -p "$HOSTDIR"
+cd "$HOSTDIR"
 
 # Export dump data to host dir:
-docker exec $MONGODB_CONTAINER mongodump $@ || fail
-docker exec $MONGODB_CONTAINER test -d $TMPDIR || (cleanup && exit)
+docker exec $MONGODB_CONTAINER mongodump $@
+docker exec $MONGODB_CONTAINER test -d $TMPDIR || exit 0
 docker cp $MONGODB_CONTAINER:"$TMPDIR" .
 docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
 
@@ -70,4 +71,4 @@ BASENAME=$(basename $TMPDIR)
 mv $BASENAME/* .
 rmdir $BASENAME
 
-cleanup
+exit 0

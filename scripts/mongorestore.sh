@@ -2,18 +2,21 @@
 
 #
 # Run mongorestore in a docker container.
-# Usage: MONGODB_CONTAINER=CONTAINER_NAME ./mongorestore.sh [ARGS...]
-# 
+# Usage: MONGODB_CONTAINER=CONTAINER_ID ./mongorestore.sh [ARGS...]
+#
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net
-# 
+#
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/MIT
 #
 
+# Exit immediately if a command exits with a non-zero status:
+set -e
+
 if [[ -z "$MONGODB_CONTAINER" ]]
 then
-	echo "Usage: MONGODB_CONTAINER=CONTAINER_NAME $0" >&2
+	echo "Usage: MONGODB_CONTAINER=CONTAINER_ID $0" >&2
 	exit 1
 fi
 
@@ -29,10 +32,8 @@ function cleanup() {
 	rm -rf "$TMPDIR"
 }
 
-function fail() {
-	cleanup
-	exit 1
-}
+# Clean up on exit:
+trap "EXITCODE=$?; cleanup; exit $EXITCODE" SIGTERM EXIT
 
 HOSTDIR="${@: -1}"
 
@@ -47,16 +48,16 @@ else
 	ARGS="$@"
 fi
 
-cd "$HOSTDIR" || fail
+cd "$HOSTDIR"
 
-docker exec $MONGODB_CONTAINER mkdir -p "$TMPDIR" || fail
+docker exec $MONGODB_CONTAINER mkdir -p "$TMPDIR"
 
 # Set host dir argument to temp dir:
 set -- "$ARGS" "$TMPDIR"
 
 # Combine host dir contents into tar file:
 DUMPFILE="$TMPDIR.tar.gz"
-tar -cf "$DUMPFILE" . || fail
+tar -cf "$DUMPFILE" .
 
 # Import dump data into the running mongo container:
 docker exec -i $MONGODB_CONTAINER sh -c "cat > '$DUMPFILE'" < "$DUMPFILE"
@@ -66,4 +67,5 @@ docker exec $MONGODB_CONTAINER rm "$DUMPFILE"
 docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
 
 rm "$DUMPFILE"
-cleanup
+
+exit 0
