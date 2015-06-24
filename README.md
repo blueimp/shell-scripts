@@ -37,10 +37,27 @@ ssh-keyscan github.com >> secrets/ssh/known_hosts
 ssh-keyscan bitbucket.org >> secrets/ssh/known_hosts
 ```
 
+### Create the secrets environment config:
+
+```sh
+echo -n '# Absolute path to the secrets dir:
+SECRETS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+export SSMTP_AUTH_PASS=password
+
+export SSL_CRT=$(cat "$SECRETS_DIR"/ssl/dev.test.crt)
+export SSL_KEY=$(cat "$SECRETS_DIR"/ssl/dev.test.key)
+
+export SSH_PRIVATE_KEY=$(cat "$SECRETS_DIR"/ssh/id_rsa)
+export SSH_PUBLIC_KEY=$(cat "$SECRETS_DIR"/ssh/id_rsa.pub)
+export SSH_KNOWN_HOSTS=$(cat "$SECRETS_DIR"/ssh/known_hosts)
+' > secrets/.env
+```
+
 ### Edit SSMTP configuration settings (except AuthPass):
 
 ```sh
-nano develop/php/ssmtp.conf
+nano develop/secretconfig/ssmtp.conf
 ```
 
 ### Build the docker development images:
@@ -58,6 +75,8 @@ mkdir ../web
 ### Start the development environment:
 
 ```sh
+source .env
+
 docker-compose up -d
 ```
 
@@ -71,11 +90,7 @@ open https://dev.test/
 
 ### Use php, phpunit, composer, redis-cli, mongo, mongorestore, mongodump:
 
-Aliases for container binaries are set via `source .env`:
-
 ```sh
-source .env
-
 php --version
 
 phpunit --version
