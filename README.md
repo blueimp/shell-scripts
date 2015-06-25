@@ -43,7 +43,8 @@ ssh-keyscan bitbucket.org >> secrets/ssh/known_hosts
 echo -n '# Absolute path to the secrets dir:
 SECRETS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-export SSMTP_AUTH_PASS=password
+export SSMTP_AUTH_USER="mail@dev.test"
+export SSMTP_AUTH_PASS="password"
 
 export SSL_CRT=$(cat "$SECRETS_DIR"/ssl/dev.test.crt)
 export SSL_KEY=$(cat "$SECRETS_DIR"/ssl/dev.test.key)
@@ -54,7 +55,7 @@ export SSH_KNOWN_HOSTS=$(cat "$SECRETS_DIR"/ssh/known_hosts)
 ' > secrets/.env
 ```
 
-### Edit SSMTP configuration settings (except AuthPass):
+### Edit SSMTP configuration settings (skip {{PLACEHOLDER}} values):
 
 ```sh
 nano develop/secretconfig/ssmtp.conf

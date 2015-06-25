@@ -6,6 +6,7 @@ webdata:
 secretconfig:
   image: develop/secretconfig
   environment:
+  - SSMTP_AUTH_USER
   - SSMTP_AUTH_PASS
   - SSL_CRT
   - SSL_KEY
