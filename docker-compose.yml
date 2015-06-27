@@ -3,16 +3,6 @@ webdata:
   image: busybox
   volumes:
   - "../web:/srv/www/dev.test"
-secretconfig:
-  image: develop/secretconfig
-  environment:
-  - SSMTP_AUTH_USER
-  - SSMTP_AUTH_PASS
-  - SSL_CRT
-  - SSL_KEY
-  - SSH_PRIVATE_KEY
-  - SSH_PUBLIC_KEY
-  - SSH_KNOWN_HOSTS
 mongodbdata:
   image: develop/mongodbdata
 mongodb:
@@ -47,8 +37,13 @@ php:
   - redis
   - elasticsearch
   volumes_from:
-  - secretconfig
   - webdata
+  environment:
+  - SSMTP_AUTH_USER
+  - SSMTP_AUTH_PASS
+  - SSH_PRIVATE_KEY
+  - SSH_PUBLIC_KEY
+  - SSH_KNOWN_HOSTS
 cron:
   image: develop/php
   links:
@@ -56,16 +51,23 @@ cron:
   - redis
   - elasticsearch
   volumes_from:
-  - secretconfig
   - webdata
+  environment:
+  - SSMTP_AUTH_USER
+  - SSMTP_AUTH_PASS
+  - SSH_PRIVATE_KEY
+  - SSH_PUBLIC_KEY
+  - SSH_KNOWN_HOSTS
   entrypoint: "cronservice"
 nginx:
   image: develop/nginx
   links:
   - php
   volumes_from:
-  - secretconfig
   - webdata
+  environment:
+  - SSL_CRT
+  - SSL_KEY
   ports:
   - "80:80"
   - "443:443"
