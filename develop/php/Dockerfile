@@ -13,4 +13,7 @@ COPY envconfig.conf /usr/local/etc/envconfig.conf
 # Assume www-data user+group to use 1000 as id:
 RUN chown -R 1000:1000 /var/www
 
+# Set file permissions required by the SSH client:
+RUN chmod 600 /var/www/.ssh/*
+
 ENTRYPOINT ["envconfig", "php5-fpm"]
