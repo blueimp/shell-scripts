@@ -54,7 +54,7 @@ NODES[3]="selenium/node-firefox-debug:$SELENIUM_VERSION"
 PROTRACTOR_IMAGE="blueimp/protractor:$PROTRACTOR_VERSION"
 SELENIUM_IMAGE="selenium/hub:$SELENIUM_VERSION"
 
-WORKDIR="/home/protractor"
+WORKDIR="/home/node"
 VOLUME="$PWD:$WORKDIR"
 
 HOSTNAME="hub"
