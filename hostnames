@@ -1,0 +1,4 @@
+# Each hostname in the configuration file must be separated by a new line.
+# Empty lines and lines starting with a hash (#) will be ignored.
+
+dev.test

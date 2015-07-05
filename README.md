@@ -2,17 +2,20 @@
 
 ## Requirements
 
-Before starting the setup process, install the following software:
+Before starting the setup process, please install the following software:
 
 ### docker
 
-For Mac OS X, please see [blueimp/boot2docker](https://github.com/blueimp/boot2docker).
+For Mac OS X, please see
+[blueimp/boot2docker](https://github.com/blueimp/boot2docker).
 
-For other operating systems, please follow the official [docker installation instructions](http://docs.docker.com/installation/).
+For other operating systems, please follow the official
+[docker documentation](http://docs.docker.com/installation/).
 
 ### docker-compose
 
-Please follow the official [docker compose installation instructions](http://docs.docker.com/compose/install/).
+Please follow the official
+[docker-compose documentation](http://docs.docker.com/compose/install/).
 
 ## Setup
 
@@ -26,45 +29,46 @@ openssl req -nodes -new -x509 \
 	-out secrets/ssl/dev.test.crt
 ```
 
-### Generate SSH keypair and known hosts file for git access:
+### Generate the SSH keypair and known hosts file for git access:
 
 ```sh
 mkdir -p secrets/ssh
 
 ssh-keygen -t rsa -C deploy -N "" -f secrets/ssh/id_rsa
 
-ssh-keyscan github.com >> secrets/ssh/known_hosts
-ssh-keyscan bitbucket.org >> secrets/ssh/known_hosts
+ssh-keyscan -t rsa github.com $(dig +short github.com) \
+  >> secrets/ssh/known_hosts
+ssh-keyscan -t rsa bitbucket.org $(dig +short bitbucket.org) \
+  >> secrets/ssh/known_hosts
 ```
 
-### Create the secrets environment config:
+### Create the environment variables config file:
 
 ```sh
-echo -n '# Absolute path to the secrets dir:
-SECRETS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+echo '
+# Each line of the expenv configuration must have the following format:
+# VARIABLE_NAME command [args...]
+# Examples:
+# PASSWORD echo secret
+# KEY cat path/to/key_file
+# Empty lines and lines starting with a hash (#) will be ignored.
 
-export SSMTP_AUTH_USER="mail@dev.test"
-export SSMTP_AUTH_PASS="password"
+SSMTP_AUTH_USER echo mail@dev.test
+SSMTP_AUTH_PASS echo password
 
-export SSL_CRT=$(cat "$SECRETS_DIR"/ssl/dev.test.crt)
-export SSL_KEY=$(cat "$SECRETS_DIR"/ssl/dev.test.key)
+SSL_CRT cat secrets/ssl/dev.test.crt
+SSL_KEY cat secrets/ssl/dev.test.key
 
-export SSH_PRIVATE_KEY=$(cat "$SECRETS_DIR"/ssh/id_rsa)
-export SSH_PUBLIC_KEY=$(cat "$SECRETS_DIR"/ssh/id_rsa.pub)
-export SSH_KNOWN_HOSTS=$(cat "$SECRETS_DIR"/ssh/known_hosts)
-' > secrets/.env
-```
-
-### Edit SSMTP configuration settings (skip {{PLACEHOLDER}} values):
-
-```sh
-nano develop/secretconfig/ssmtp.conf
+SSH_PRIVATE_KEY cat secrets/ssh/id_rsa
+SSH_PUBLIC_KEY cat secrets/ssh/id_rsa.pub
+SSH_KNOWN_HOSTS cat secrets/ssh/known_hosts
+' > .expenv
 ```
 
 ### Build the docker development images:
 
 ```sh
-./develop/build.sh
+./bin/build.sh
 ```
 
 ### Create the web directory:
@@ -73,23 +77,31 @@ nano develop/secretconfig/ssmtp.conf
 mkdir ../web
 ```
 
+### Source the environment variables and command aliases:
+
+```sh
+. .env
+```
+
 ### Start the development environment:
 
 ```sh
-source .env
-
 docker-compose up -d
 ```
 
-### Update the hosts file and open the development website:
+### Update the hosts file with the development hostname:
 
 ```sh
-./scripts/update-hosts.sh dev.test
+./bin/hostnames.sh
+```
 
+### Open the development website:
+
+```sh
 open https://dev.test/
 ```
 
-### Use php, phpunit, composer, redis-cli, mongo, mongorestore, mongodump:
+### Use aliases to execute commands in docker containers:
 
 ```sh
 php --version
@@ -109,8 +121,9 @@ mongodump --version
 
 #### Command Working directory
 
-The working directory for a binary is set to that of its container, e.g. `/srv/www` for the php container and its php binaries.  
-As a result, we have to take this working directory into account when executing the commands, e.g.:
+The working directory for a binary is set to that of its container,
+e.g. `/srv/www` for the php container and its php binaries.  
+As a result, we have to take this working directory into account, e.g.:
 
 ```sh
 composer status -d dev.test
