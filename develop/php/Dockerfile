@@ -1,4 +1,4 @@
-FROM blueimp/php
+FROM blueimp/php:5.6
 
 COPY php.ini /etc/php5/fpm/conf.d/99-custom.ini
 COPY crontab /etc/crontab
