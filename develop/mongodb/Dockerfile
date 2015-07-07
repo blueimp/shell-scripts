@@ -1,3 +1,3 @@
-FROM blueimp/mongodb
+FROM blueimp/mongodb:3.0
 
-COPY mongodb.conf /etc/mongodb.conf
+COPY mongod.yml /etc/mongod.yml
