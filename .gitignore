@@ -1,4 +1,5 @@
 .DS_Store
 .expenv
 /blueimp
+/dump
 /secrets
