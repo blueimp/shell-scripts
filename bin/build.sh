@@ -19,16 +19,16 @@ set -e
 # Change to the given or the default develop directory:
 cd "${1:-$(dirname "$0")/../develop}"
 
-# Normalizes according to docker-compose project naming rules:
+# Normalizes according to docker hub project/tag naming conventions:
 normalize() {
-	echo "$1" | tr '[A-Z]' '[a-z]' | sed s/[^a-z0-9]//g
+	echo "$1" | tr '[A-Z]' '[a-z]' | sed 's/[^a-z0-9._-]//g'
 }
 
 # Use the normalized project folder name:
 PROJECT=$(normalize "$(basename "$PWD")")
 
 # Iterate over all visible folders in the given directory:
-for DIR in `ls -d */`
+for DIR in $(ls -d */)
 do
 	# Build a docker image for each folder:
 	docker build -t $PROJECT/$(normalize "$DIR") "$DIR"
