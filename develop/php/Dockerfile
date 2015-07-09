@@ -7,13 +7,8 @@ COPY ssmtp.conf /etc/ssmtp/ssmtp.conf
 COPY envconfig.sh /usr/local/bin/envconfig
 COPY envconfig.conf /usr/local/etc/envconfig.conf
 
-# Create empty SSH configuration files to be filled in via envconfig:
-RUN mkdir -p /var/www/.ssh \
-  && touch \
-    /var/www/.ssh/id_rsa \
-    /var/www/.ssh/id_rsa.pub \
-    /var/www/.ssh/known_hosts \
-  && chmod 600 /var/www/.ssh/* \
-  && chown -R www-data:www-data /var/www
+COPY entrypoint.sh /usr/local/bin/entrypoint
 
-ENTRYPOINT ["envconfig", "php5-fpm"]
+ENTRYPOINT ["envconfig", "entrypoint"]
+
+CMD ["php5-fpm"]
