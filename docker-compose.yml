@@ -2,78 +2,78 @@ webdata:
   # Mapping host volume for development:
   image: tianon/true
   volumes:
-  - "../web:/srv/www/dev.test"
+    - "../web:/srv/www/dev.test"
 mongodbdata:
   image: tianon/true
   volumes:
-  - /data/db
+    - /data/db
 mongodb:
   image: blueimp/mongodb:3.0
   volumes_from:
-  - mongodbdata
+    - mongodbdata
   # Debug access:
   ports:
-  - "27017:27017"
+    - "27017:27017"
 redisdata:
   image: tianon/true
   volumes:
-  - /data/redis
+    - /data/redis
 redis:
   image: blueimp/redis:3.0
   volumes_from:
-  - redisdata
+    - redisdata
   # Debug access:
   ports:
-  - "6379:6379"
+    - "6379:6379"
 elasticsearchdata:
   image: tianon/true
   volumes:
-  - /usr/share/elasticsearch/data
+    - /usr/share/elasticsearch/data
 elasticsearch:
   image: blueimp/elasticsearch:1.6
   volumes_from:
-  - elasticsearchdata
+    - elasticsearchdata
   # Debug access:
   ports:
-  - "9200:9200"
+    - "9200:9200"
 php:
   image: develop/php
   links:
-  - mongodb
-  - redis
-  - elasticsearch
+    - mongodb
+    - redis
+    - elasticsearch
   volumes_from:
-  - webdata
+    - webdata
   environment:
-  - SSMTP_AUTH_USER
-  - SSMTP_AUTH_PASS
-  - SSH_PRIVATE_KEY
-  - SSH_PUBLIC_KEY
-  - SSH_KNOWN_HOSTS
+    - SSMTP_AUTH_USER
+    - SSMTP_AUTH_PASS
+    - SSH_PRIVATE_KEY
+    - SSH_PUBLIC_KEY
+    - SSH_KNOWN_HOSTS
 cron:
   image: develop/php
   links:
-  - mongodb
-  - redis
-  - elasticsearch
+    - mongodb
+    - redis
+    - elasticsearch
   volumes_from:
-  - webdata
+    - webdata
   environment:
-  - SSMTP_AUTH_USER
-  - SSMTP_AUTH_PASS
-  - SSH_PRIVATE_KEY
-  - SSH_PUBLIC_KEY
-  - SSH_KNOWN_HOSTS
+    - SSMTP_AUTH_USER
+    - SSMTP_AUTH_PASS
+    - SSH_PRIVATE_KEY
+    - SSH_PUBLIC_KEY
+    - SSH_KNOWN_HOSTS
   entrypoint: "cronservice"
 nginx:
   image: develop/nginx
   links:
-  - php
+    - php
   volumes_from:
-  - webdata
+    - webdata
   environment:
-  - SSL_CRT
-  - SSL_KEY
+    - SSL_CRT
+    - SSL_KEY
   ports:
-  - "80:80"
-  - "443:443"
+    - "80:80"
+    - "443:443"
