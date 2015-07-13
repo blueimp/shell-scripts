@@ -30,13 +30,15 @@ mkdir -p /run/superd
 shutdown() {
   # Create a lock or return if it already exists:
   mkdir /run/superd/shutdown.lock 2> /dev/null || return
-  # Use a loop to check for the existance of multiple PID files:
+  # A loop allows us to use a wildcard pattern to check for multiple files:
   for file in /run/superd/*.pid; do
+    # If no files are found, the unexpanded pattern is returned as result:
+    [ "$file" = '/run/superd/*.pid' ] && break
     # Terminate remaining processes, ignore stdout and stderr output:
     kill $(cat /run/superd/*.pid) > /dev/null 2>&1
     # Remove the obsolete PID files:
     rm /run/superd/*.pid
-    # Break, as the loop is only used as wildcard glob pattern check:
+    # Break, as we only need to run the shutdown sequence once:
     break
   done
   # Remove the lock:
