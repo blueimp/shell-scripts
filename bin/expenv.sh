@@ -22,9 +22,6 @@
 # http://www.opensource.org/licenses/MIT
 #
 
-# Exit immediately if a command exits with a non-zero status:
-set -e
-
 # Prints export statements based on command execution output:
 # Usage: print_export VARIABLE_NAME command [args...]
 # Examples:

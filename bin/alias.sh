@@ -12,9 +12,6 @@
 # http://www.opensource.org/licenses/MIT
 #
 
-# Exit immediately if a command exits with a non-zero status:
-set -e
-
 # The escaped bin dir path:
 BIN="'$(cd "$(dirname "$0")" && pwd | sed "s/'/'\\\''/g")'"
 
