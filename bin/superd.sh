@@ -28,10 +28,19 @@ mkdir -p /run/superd
 
 # Terminates remaining child processes:
 shutdown() {
-  # Terminate processes and ignore errors for non-existing process ids:
-  kill $(cat /run/superd/*.pid) > /dev/null 2>&1
-  # Remove the obsolete PID files;
-  rm /run/superd/*.pid
+  # Create a lock or return if it already exists:
+  mkdir /run/superd/shutdown.lock 2> /dev/null || return
+  # Use a loop to check for the existance of multiple PID files:
+  for file in /run/superd/*.pid; do
+    # Terminate remaining processes, ignore stdout and stderr output:
+    kill $(cat /run/superd/*.pid) > /dev/null 2>&1
+    # Remove the obsolete PID files:
+    rm /run/superd/*.pid
+    # Break, as the loop is only used as wildcard glob pattern check:
+    break
+  done
+  # Remove the lock:
+  rmdir /run/superd/shutdown.lock
 }
 
 # Runs a given command and terminates sibling processes on exit:
@@ -39,11 +48,11 @@ run() {
   # Start the given command as background process:
   "$@" &
   # Get the PID of the background process:
-  local PID=$!
+  local pid=$!
   # Store the PID with the checksum of the exact command as file name:
-  echo $PID > /run/superd/"$(printf '%s' "$@" | sha1sum | cut -f1 -d' ')".pid
+  echo $pid > /run/superd/"$(printf '%s' "$@" | sha1sum | cut -f1 -d' ')".pid
   # Wait for the background process to terminate:
-  wait $PID
+  wait $pid
   # Terminate remaining child processes:
   shutdown
 }
