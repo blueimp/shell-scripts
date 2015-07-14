@@ -64,7 +64,7 @@ cron:
     - SSH_PRIVATE_KEY
     - SSH_PUBLIC_KEY
     - SSH_KNOWN_HOSTS
-  entrypoint: "cronservice"
+  command: "superd"
 nginx:
   image: develop/nginx
   links:
