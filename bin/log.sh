@@ -44,7 +44,7 @@ for arg in "$@"; do
   arg="$(echo "$arg" | sed "s/'/'\\\''/g")"
   case "$arg" in
     # Quote arguments containing characters not in the whitelist:
-    *[^a-zA-Z0-9_-]*)
+    *[!a-zA-Z0-9_-]*)
       CMD="$CMD'$arg' ";;
     *)
       CMD="$CMD$arg ";;
