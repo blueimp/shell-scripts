@@ -4,7 +4,7 @@
 # Tags docker images of all folders in a directory based on git branch names.
 # If no directory is given, tags the images of the develop directory.
 #
-# Usage: ./build.sh [images_path]
+# Usage: ./tag.sh [images_path]
 #
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net
