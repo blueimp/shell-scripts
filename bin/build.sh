@@ -28,8 +28,8 @@ normalize() {
 PROJECT=$(normalize "$(basename "$PWD")")
 
 # Iterate over all visible folders in the given directory:
-for DIR in $(ls -d */)
+for dir in $(ls -d */)
 do
 	# Build a docker image for each folder:
-	docker build -t $PROJECT/$(normalize "$DIR") "$DIR"
+	docker build -t $PROJECT/$(normalize "$dir") "$dir"
 done
