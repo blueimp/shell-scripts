@@ -38,13 +38,9 @@ print_export() {
 print_exports_from_file() {
   # Enter the config file directory to account for relative config paths:
   cd "$(dirname "$1")"
-  while read line
-  do
+  while read line; do
     # Skip empty lines and lines starting with a hash (#):
-    if [ -z "$line" ] || [ "${line#\#}" != "$line" ]
-    then
-      continue
-    fi
+    ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
     # Call print_export with the line components as arguments:
     eval "print_export $line"
   # Use the given config file as input:

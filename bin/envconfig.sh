@@ -36,13 +36,9 @@ find_and_replace() {
 }
 
 write_config() {
-  while read line
-  do
+  while read line; do
     # Skip empty lines and lines starting with a hash (#):
-    if [ -z "$line" ] || [ "${line#\#}" != "$line" ]
-    then
-      continue
-    fi
+    ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
     # Extract the substring up to the first space as variable name:
     local name="${line%% *}"
     # Extract the remainder as path and trim any surrounding whitespace:
@@ -50,8 +46,7 @@ write_config() {
     # Evaluate the name as environment variable, print error if unset:
     local value="$(eval 'echo "${'$name'?}"')"
     # Check if the file exists and has a size greater than zero:
-    if [ -s "$path" ]
-    then
+    if [ -s "$path" ]; then
       # Replace the placeholder with the environment variable:
       find_and_replace "{{$name}}" "$value" "$path"
     else
@@ -65,8 +60,7 @@ write_config() {
 }
 
 # Check if envconfig configuration is provided via environment variable:
-if [ "$1" = "-e" ]
-then
+if [ "$1" = "-e" ]; then
   # Write the environment variable to a temporary file, fail if unset:
   eval 'echo "${'$2'?}"' > /tmp/envconfig.conf
   # Use the temporary file to write the env config:
@@ -76,8 +70,7 @@ then
 fi
 
 # Check if the config file is provided via command line:
-if [ "$1" = "-f" ]
-then
+if [ "$1" = "-f" ]; then
   # Use the given config file to write the env config:
   write_config "$2"
   # Shift the arguments list to remove the given -f option:

@@ -21,8 +21,7 @@ normalize() {
 	echo "$1" | tr '[A-Z]' '[a-z]' | sed s/[^a-z0-9]//g
 }
 
-if [ -z "$DOCKER_HOST_IP" ]
-then
+if [ -z "$DOCKER_HOST_IP" ]; then
   DOCKER_HOST_IP='127.0.0.1'
 fi
 
@@ -39,13 +38,9 @@ sed "/$MARKERSTART/,/$MARKEREND/d" /etc/hosts > $TMPFILE
 
 # Add the new dev host entries to the temporary file:
 echo "$MARKERSTART" >> $TMPFILE
-while read line
-do
+while read line; do
   # Skip empty lines and lines starting with a hash (#):
-  if [ -z "$line" ] || [ "${line#\#}" != "$line" ]
-  then
-    continue
-  fi
+  ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
   # Add each hostname entry with the $DOCKER_HOST_IP to the temporary file:
   printf '%s\t%s\n' "$DOCKER_HOST_IP" "$line" >> $TMPFILE
 # Use "$PWD/hostnames" as config file when called without argument:
@@ -59,8 +54,7 @@ DIFF="$(diff /etc/hosts $TMPFILE)"
 CONTENT="$(cat $TMPFILE)"
 rm $TMPFILE
 
-if [ ! "$DIFF" ]
-then
+if [ ! "$DIFF" ]; then
   echo 'No updates to /etc/hosts required.'
   exit
 fi
@@ -74,19 +68,16 @@ echo 'This will require Administrator privileges.'
 echo 'Please type "y" if you wish to proceed.'
 read CONFIRM
 
-if [ "$CONFIRM" = "y" ]
-then
+if [ "$CONFIRM" = "y" ]; then
   # Check if we have root access:
-  if [ $(id -u) -eq 0 ]
-  then
+  if [ $(id -u) -eq 0 ]; then
     echo "$CONTENT" > /etc/hosts
   else
     # Get root access and then write the new hosts file:
     echo "$CONTENT" | sudo tee /etc/hosts > /dev/null
   fi
   # Check if the last command failed:
-  if [ $? -eq 0 ]
-  then
+  if [ $? -eq 0 ]; then
     echo "Successfully updated /etc/hosts."
     exit
   else

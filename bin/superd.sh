@@ -61,13 +61,9 @@ run() {
 
 # Runs commands defined in the given config file:
 startup() {
-  while read line
-  do
+  while read line; do
     # Skip empty lines and lines starting with a hash (#):
-    if [ -z "$line" ] || [ "${line#\#}" != "$line" ]
-    then
-      continue
-    fi
+    ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
     # Call the run function with the line components as arguments:
     eval "run $line" &
   # Use the given config file as input:

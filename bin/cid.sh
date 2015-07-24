@@ -29,8 +29,7 @@ service_filter=label=com.docker.compose.service="$1"
 id="$(docker ps -q -l -f "$project_filter" -f "$service_filter")"
 
 # Print an error message when the service has not been created:
-if [ -z "$id" ]
-then
+if [ -z "$id" ]; then
 	c031='\033[0;31m' # red
 	c0='\033[0m' # no color
 	printf "${c031}ERROR:${c0} docker-compose service \"$1\" not created\n" >&2

@@ -16,14 +16,12 @@ set -e
 
 MONGODB_USER=${MONGODB_USER:-mongodb}
 
-if [[ -z "$MONGODB_CONTAINER" ]]
-then
+if [[ -z "$MONGODB_CONTAINER" ]]; then
 	echo "Usage: MONGODB_CONTAINER=CONTAINER_ID $0" >&2
 	exit 1
 fi
 
-if [ "$1" = "--help" ] || [ "$1" = "--version" ]
-then
+if [ "$1" = "--help" ] || [ "$1" = "--version" ]; then
 	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@ || exit 1
 	exit
 fi
@@ -39,8 +37,7 @@ trap "EXITCODE=$?; cleanup; exit $EXITCODE" SIGTERM EXIT
 
 HOSTDIR="${@: -1}"
 
-if [ -d "$HOSTDIR" ]
-then
+if [ -d "$HOSTDIR" ]; then
 	# Keep all but the last argument:
 	ARGS="${@:1:$#-1}"
 else

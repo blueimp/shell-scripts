@@ -16,14 +16,12 @@ set -e
 
 MONGODB_USER=${MONGODB_USER:-mongodb}
 
-if [[ -z "$MONGODB_CONTAINER" ]]
-then
+if [[ -z "$MONGODB_CONTAINER" ]]; then
 	echo "Usage: MONGODB_CONTAINER=CONTAINER_ID $0" >&2
 	exit 1
 fi
 
-if [ "$1" = "--help" ] || [ "$1" = "--version" ]
-then
+if [ "$1" = "--help" ] || [ "$1" = "--version" ]; then
 	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump $@ || exit 1
 	exit
 fi
@@ -39,11 +37,9 @@ trap "EXITCODE=$?; cleanup; exit $EXITCODE" SIGTERM EXIT
 
 HOSTDIR=""
 
-for ((i=1; i<=$#; i++))
-do
+for ((i=1; i<=$#; i++)); do
 	# Check if dump target is set:
-	if [ "${!i}" = "--out" ]
-	then
+	if [ "${!i}" = "--out" ]; then
 		HOSTDIR=${@:i+1:1}
 		# Replace host dir argument with temp dir:
 		set -- "${@:1:i}" "$TMPDIR" "${@:i+2:$#}"
@@ -51,8 +47,7 @@ do
 	fi
 done
 
-if [[ -z "$HOSTDIR" ]]
-then
+if [[ -z "$HOSTDIR" ]]; then
 	# Use default dump target as host dir:
 	HOSTDIR="$PWD/dump"
 	# Set dump target to temp dir:

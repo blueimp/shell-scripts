@@ -28,8 +28,7 @@ normalize() {
 PROJECT=$(normalize "$(basename "$PWD")")
 
 # Iterate over all visible folders in the given directory:
-for dir in $(ls -d */)
-do
+for dir in $(ls -d */); do
 	cd "$dir"
 		# Iterate over all branches:
 		branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
