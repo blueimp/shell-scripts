@@ -14,8 +14,7 @@
 # Exit immediately if a command exits with a non-zero status:
 set -e
 
-# Command prefix to run docker exec commands as mongodb user:
-GOSU='gosu mongodb'
+MONGODB_USER=${MONGODB_USER:-mongodb}
 
 if [[ -z "$MONGODB_CONTAINER" ]]
 then
@@ -25,7 +24,7 @@ fi
 
 if [ "$1" = "--help" ] || [ "$1" = "--version" ]
 then
-	docker exec $MONGODB_CONTAINER $GOSU mongodump $@ || exit 1
+	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump $@ || exit 1
 	exit
 fi
 
@@ -64,10 +63,10 @@ mkdir -p "$HOSTDIR"
 cd "$HOSTDIR"
 
 # Export dump data to host dir:
-docker exec $MONGODB_CONTAINER $GOSU mongodump $@
-docker exec $MONGODB_CONTAINER $GOSU test -d $TMPDIR || exit 0
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump $@
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER test -d $TMPDIR || exit 0
 docker cp $MONGODB_CONTAINER:"$TMPDIR" .
-docker exec $MONGODB_CONTAINER $GOSU rm -rf "$TMPDIR"
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER rm -rf "$TMPDIR"
 
 # Move the dump data out of the temp dir:
 BASENAME=$(basename $TMPDIR)

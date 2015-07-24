@@ -14,8 +14,7 @@
 # Exit immediately if a command exits with a non-zero status:
 set -e
 
-# Command prefix to run docker exec commands as mongodb user:
-GOSU='gosu mongodb'
+MONGODB_USER=${MONGODB_USER:-mongodb}
 
 if [[ -z "$MONGODB_CONTAINER" ]]
 then
@@ -25,7 +24,7 @@ fi
 
 if [ "$1" = "--help" ] || [ "$1" = "--version" ]
 then
-	docker exec $MONGODB_CONTAINER $GOSU mongorestore $@ || exit 1
+	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@ || exit 1
 	exit
 fi
 
@@ -53,7 +52,7 @@ fi
 
 cd "$HOSTDIR"
 
-docker exec $MONGODB_CONTAINER $GOSU mkdir -p "$TMPDIR"
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER mkdir -p "$TMPDIR"
 
 # Set host dir argument to temp dir:
 set -- "$ARGS" "$TMPDIR"
@@ -63,11 +62,13 @@ DUMPFILE="$TMPDIR.tar.gz"
 tar -cf "$DUMPFILE" .
 
 # Import dump data into the running mongo container:
-docker exec -i $MONGODB_CONTAINER $GOSU sh -c "cat > '$DUMPFILE'" < "$DUMPFILE"
-docker exec $MONGODB_CONTAINER $GOSU tar -xf "$DUMPFILE" -C "$TMPDIR"
-docker exec $MONGODB_CONTAINER $GOSU mongorestore $@
-docker exec $MONGODB_CONTAINER $GOSU rm "$DUMPFILE"
-docker exec $MONGODB_CONTAINER $GOSU rm -rf "$TMPDIR"
+docker exec -i -u $MONGODB_USER $MONGODB_CONTAINER \
+	sh -c "cat > '$DUMPFILE'" < "$DUMPFILE"
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER \
+	tar -xf "$DUMPFILE" -C "$TMPDIR"
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER rm "$DUMPFILE"
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER rm -rf "$TMPDIR"
 
 rm "$DUMPFILE"
 
