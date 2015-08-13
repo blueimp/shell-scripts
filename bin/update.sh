@@ -16,7 +16,7 @@
 # Iterate over the docker image definitions in a given YAML file:
 for image in $(
 		# Extract lines containing an image definition:
-		grep -w 'image:' ${1:-docker-compose.yml} |
+		grep -w 'image:' "${1:-docker-compose.yml}" |
 		# Extract the image definition:
 		awk '{print $2}' |
 		# Sort and remove duplicate entries:

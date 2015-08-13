@@ -32,7 +32,7 @@ id="$(docker ps -q -l -f "$project_filter" -f "$service_filter")"
 if [ -z "$id" ]; then
 	c031='\033[0;31m' # red
 	c0='\033[0m' # no color
-	printf "${c031}ERROR:${c0} docker-compose service \"$1\" not created\n" >&2
+	echo "${c031}ERROR:${c0} docker-compose service \"$1\" not created" >&2
 	exit 1
 fi
 
