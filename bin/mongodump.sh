@@ -22,7 +22,7 @@ if [ -z "$MONGODB_CONTAINER" ]; then
 fi
 
 if [ "$1" = "--help" ] || [ "$1" = "--version" ]; then
-	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump $@
+	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump "$@"
 	exit $?
 fi
 

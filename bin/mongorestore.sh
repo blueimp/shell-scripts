@@ -22,7 +22,7 @@ if [ -z "$MONGODB_CONTAINER" ]; then
 fi
 
 if [ "$1" = "--help" ] || [ "$1" = "--version" ]; then
-	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@
+	docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore "$@"
 	exit $?
 fi
 
@@ -69,5 +69,5 @@ cd "$HOSTDIR"
 # Import the dump data into the running mongo container:
 docker exec $MONGODB_CONTAINER mkdir -p "$TMPDIR"
 docker cp . $MONGODB_CONTAINER:"$TMPDIR"
-docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@
+docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore "$@"
 docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
