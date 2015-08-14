@@ -54,19 +54,9 @@ docker exec -u $MONGODB_USER $MONGODB_CONTAINER mkdir -p "$TMPDIR"
 # Set host dir argument to temp dir:
 set -- "$ARGS" "$TMPDIR"
 
-# Combine host dir contents into tar file:
-DUMPFILE="$TMPDIR.tar.gz"
-tar -cf "$DUMPFILE" .
-
 # Import dump data into the running mongo container:
-docker exec -i -u $MONGODB_USER $MONGODB_CONTAINER \
-	sh -c "cat > '$DUMPFILE'" < "$DUMPFILE"
-docker exec -u $MONGODB_USER $MONGODB_CONTAINER \
-	tar -xf "$DUMPFILE" -C "$TMPDIR"
+docker cp . $MONGODB_CONTAINER:"$TMPDIR"
 docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore $@
-docker exec -u $MONGODB_USER $MONGODB_CONTAINER rm "$DUMPFILE"
-docker exec -u $MONGODB_USER $MONGODB_CONTAINER rm -rf "$TMPDIR"
-
-rm "$DUMPFILE"
+docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
 
 exit 0
