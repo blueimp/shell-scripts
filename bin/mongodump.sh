@@ -47,7 +47,7 @@ for arg; do
 		RESET="true"
 	fi
 	# Check for a dump target in "--out=dump/" format:
-	if [ ! -z "${arg#--out=}" ]; then
+	if [ "${arg#--out=}" != "$arg" ]; then
 		arg="${arg#--out=}"
 		set -- "$@" -o
 		LAST_ARG="-o"
