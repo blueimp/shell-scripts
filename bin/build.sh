@@ -92,7 +92,7 @@ build_images() {
 		echo 'Could not resolve image dependencies.' >&2
 		return 1
 	fi
-	for file in "$@"; do
+	for file; do
 		# Shift the arguments list to remove the current Dockerfile:
 		shift
 		if ! build "$file"; then
