@@ -8,7 +8,7 @@
 # https://blueimp.net
 #
 # Licensed under the MIT license:
-# http://www.opensource.org/licenses/MIT
+# http://opensource.org/licenses/MIT
 #
 
 # Exit immediately if a command exits with a non-zero status:
@@ -66,8 +66,15 @@ fi
 
 cd "$HOSTDIR"
 
-# Import the dump data into the running mongo container:
+find_and_replace() {
+	awk -v find="$1" -v repl="$2" '{gsub(find,repl,$0);print $0}'
+}
+
+# Import the dump data into the running mongodb container:
 docker exec $MONGODB_CONTAINER mkdir -p "$TMPDIR"
 docker cp . $MONGODB_CONTAINER:"$TMPDIR"
-docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore "$@"
+# Restore the imported dump data
+# and replace the temp dir with the host dir in the stderr output:
+{ docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore "$@" 2>&3; } \
+	3>&1 1>&2 | find_and_replace "$TMPDIR" "$HOSTDIR" 1>&2
 docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
