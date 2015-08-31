@@ -2,7 +2,7 @@
 
 #
 # Updates hostnames for $DOCKER_HOST_IP or 127.0.0.1 in /etc/hosts.
-# Usage: ./hostnames.sh [config_file]
+# Usage: ./hostnames.sh [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
 #
@@ -16,74 +16,99 @@
 # http://www.opensource.org/licenses/MIT
 #
 
+# Use 127.0.0.1 as default docker host IP:
+DOCKER_HOST_IP="${DOCKER_HOST_IP:-'127.0.0.1'}"
+
+if [ $# = 0 ]; then
+	# Without arguments, use "$PWD/hostnames" as default configuration file:
+	set -- "$PWD/hostnames"
+fi
+
 # Normalizes according to docker-compose project naming rules:
 normalize() {
 	echo "$1" | tr '[A-Z]' '[a-z]' | sed s/[^a-z0-9]//g
 }
 
-if [ -z "$DOCKER_HOST_IP" ]; then
-  DOCKER_HOST_IP='127.0.0.1'
-fi
+# Returns a marker to identify the hostname settings in /etc/hosts:
+marker() {
+	# Use the config file folder as project name:
+	local project="$(normalize "$(basename "$(cd "$(dirname "$1")" && pwd)")")"
+	local config_name="$(normalize "$(basename "$1")")"
+	echo "## $project $config_name"
+}
 
-# Use the config file folder as project name:
-PROJECT=$(normalize "$(basename "$(cd "$(dirname "${1:-.}")" && pwd)")")
+# Updates hosts from STDIN with the mappings in the given config file:
+map_hostnames() {
+	local marker_base="## $(marker "$1")"
+	local marker_start="$marker_base start"
+	local marker_end="$marker_base end"
 
-MARKERSTART="## $PROJECT hosts start"
-MARKEREND="## $PROJECT hosts end"
+	# Remove the current hostnames section:
+	sed "/$marker_start/,/$marker_end/d"
 
-TMPFILE=$(mktemp /tmp/hosts.XXXXXXXXXX)
+	# Add the new hostname settings:
+	echo "$marker_start"
+	while read line; do
+		# Skip empty lines and lines starting with a hash (#):
+	  ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
+	  # Add each hostname entry with the $DOCKER_HOST_IP as mapping:
+	  printf '%s\t%s\n' "$DOCKER_HOST_IP" "$line"
+	done < "$1"
+	echo "$marker_end"
+}
 
-# Copy /etc/hosts to a temporary file with the old dev host entries removed:
-sed "/$MARKERSTART/,/$MARKEREND/d" /etc/hosts > $TMPFILE
+# Updates /etc/hosts with the given content after confirmation from the user:
+update_hosts() {
+	local hosts_content="$1"
 
-# Add the new dev host entries to the temporary file:
-echo "$MARKERSTART" >> $TMPFILE
-while read line; do
-  # Skip empty lines and lines starting with a hash (#):
-  ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
-  # Add each hostname entry with the $DOCKER_HOST_IP to the temporary file:
-  printf '%s\t%s\n' "$DOCKER_HOST_IP" "$line" >> $TMPFILE
-# Use "$PWD/hostnames" as config file when called without argument:
-done < "${1:-hostnames}"
-echo "$MARKEREND" >> $TMPFILE
+	# Diff /etc/hosts with the new content:
+	local hosts_diff="$(echo "$hosts_content" | diff /etc/hosts -)"
 
-# Diff the original hosts file with the temporary file:
-DIFF="$(diff /etc/hosts $TMPFILE)"
+	if [ ! "$hosts_diff" ]; then
+	  echo 'No updates to /etc/hosts required.'
+	  return
+	fi
 
-# Store the content of the temporary file so we can delete it:
-CONTENT="$(cat $TMPFILE)"
-rm $TMPFILE
+	# Show a confirmation prompt to the user:
+	echo
+	echo "$hosts_diff"
+	echo
+	echo 'Update /etc/hosts with the given changes?'
+	echo 'This will require Administrator privileges.'
+	echo 'Please type "y" if you wish to proceed.'
+	read confirmation
 
-if [ ! "$DIFF" ]; then
-  echo 'No updates to /etc/hosts required.'
-  exit
-fi
+	if [ "$confirmation" = "y" ]; then
+	  # Check if we have root access:
+	  if [ $(id -u) -eq 0 ]; then
+	    echo "$hosts_content" > /etc/hosts
+	  else
+	    # Get root access and then write the new hosts file:
+	    echo "$hosts_content" | sudo tee /etc/hosts > /dev/null
+	  fi
+	  # Check if the last command failed:
+	  if [ $? -eq 0 ]; then
+	    echo "Successfully updated /etc/hosts."
+	    return
+	  else
+	    echo "Update of /etc/hosts failed." >&2
+	    return 1
+	  fi
+	fi
 
-# Show a confirmation prompt to the user:
-echo
-echo "$DIFF"
-echo
-echo 'Update /etc/hosts with the given changes?'
-echo 'This will require Administrator privileges.'
-echo 'Please type "y" if you wish to proceed.'
-read CONFIRM
+	echo "No updates to /etc/hosts written."
+}
 
-if [ "$CONFIRM" = "y" ]; then
-  # Check if we have root access:
-  if [ $(id -u) -eq 0 ]; then
-    echo "$CONTENT" > /etc/hosts
-  else
-    # Get root access and then write the new hosts file:
-    echo "$CONTENT" | sudo tee /etc/hosts > /dev/null
-  fi
-  # Check if the last command failed:
-  if [ $? -eq 0 ]; then
-    echo "Successfully updated /etc/hosts."
-    exit
-  else
-    echo "Update of /etc/hosts failed." >&2
-    exit 1
-  fi
-fi
+# Retrieve the current host settings:
+HOSTS_CONTENT="$(cat /etc/hosts)"
 
-echo "No updates to /etc/hosts written."
+for file in "$@"; do
+	if [ ! -f "$file" ]; then
+		echo "$file is not a valid file." >&2
+		continue
+	fi
+	# Update the mappings for each configuration file:
+	HOSTS_CONTENT="$(echo "$HOSTS_CONTENT" | map_hostnames "$file")"
+done
+
+update_hosts "$HOSTS_CONTENT"
