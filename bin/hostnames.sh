@@ -4,7 +4,7 @@
 # Updates hostnames for $DOCKER_HOST_IP or 127.0.0.1 in /etc/hosts.
 # Usage: ./hostnames.sh [config_file]
 #
-# The default configuration file is "$PWD/.expenv".
+# The default configuration file is "$PWD/hostnames".
 #
 # Each hostname in the configuration file must be separated by a new line.
 # Empty lines and lines starting with a hash (#) will be ignored.
