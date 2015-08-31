@@ -2,9 +2,11 @@
 
 #
 # Updates hostnames for $DOCKER_HOST_IP or 127.0.0.1 in /etc/hosts.
-# Usage: ./hostnames.sh [config_file_1] [config_file_2] [...]
+# Usage: ./hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
+#
+# If the "-d" argument is given, the hostname entries are removed.
 #
 # Each hostname in the configuration file must be separated by a new line.
 # Empty lines and lines starting with a hash (#) will be ignored.
@@ -18,6 +20,12 @@
 
 # Use 127.0.0.1 as default docker host IP:
 DOCKER_HOST_IP="${DOCKER_HOST_IP:-'127.0.0.1'}"
+
+if [ $1 == '-d' ]; then
+	# An empty DOCKER_HOST_IP signifies the removal of the hostname entries:
+	DOCKER_HOST_IP=''
+	shift
+fi
 
 if [ $# = 0 ]; then
 	# Without arguments, use "$PWD/hostnames" as default configuration file:
@@ -45,6 +53,9 @@ map_hostnames() {
 
 	# Remove the current hostnames section:
 	sed "/$marker_start/,/$marker_end/d"
+
+	# Don't add any entries unless DOCKER_HOST_IP is set:
+	[ -z "$DOCKER_HOST_IP" ] && return
 
 	# Add the new hostname settings:
 	echo "$marker_start"
