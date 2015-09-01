@@ -21,7 +21,7 @@
 # Use 127.0.0.1 as default docker host IP:
 DOCKER_HOST_IP="${DOCKER_HOST_IP:-'127.0.0.1'}"
 
-if [ $1 == '-d' ]; then
+if [ "$1" == '-d' ]; then
 	# An empty DOCKER_HOST_IP signifies the removal of the hostname entries:
 	DOCKER_HOST_IP=''
 	shift
