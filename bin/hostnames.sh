@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# Updates hostnames for $DOCKER_HOST_IP or 127.0.0.1 in /etc/hosts.
+# Updates hostnames for the docker host IP or 127.0.0.1 in /etc/hosts.
 # Usage: ./hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
@@ -18,13 +18,17 @@
 # http://www.opensource.org/licenses/MIT
 #
 
-# Use 127.0.0.1 as default docker host IP:
-DOCKER_HOST_IP="${DOCKER_HOST_IP:-'127.0.0.1'}"
-
 if [ "$1" == '-d' ]; then
 	# An empty DOCKER_HOST_IP signifies the removal of the hostname entries:
 	DOCKER_HOST_IP=''
 	shift
+elif [ -z "$DOCKER_HOST" ]; then
+	# Use 127.0.0.1 as default docker host IP:
+	DOCKER_HOST_IP='127.0.0.1'
+else
+	# Extract the docker host IP from the DOCKER_HOST url:
+	DOCKER_HOST_IP="${DOCKER_HOST##*/}"
+	DOCKER_HOST_IP="${DOCKER_HOST_IP%:*}"
 fi
 
 if [ $# = 0 ]; then
