@@ -28,6 +28,16 @@ fi
 
 TMPDIR="$(mktemp -d /tmp/mongodb-dump-XXXXXXXXXX)"
 
+SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
+
+replace() {
+	if [ -f "$SCRIPTDIR"/replace.sh ]; then
+		"$SCRIPTDIR"/replace.sh "$@"
+	else
+		cat
+	fi
+}
+
 cleanup() {
 	rm -rf "$TMPDIR"
 }
@@ -75,14 +85,10 @@ fi
 mkdir -p "$HOSTDIR"
 cd "$HOSTDIR"
 
-find_and_replace() {
-	awk -v find="$1" -v repl="$2" '{gsub(find,repl,$0);print $0}'
-}
-
 # Export dump data from the running mongodb container to the host dir
 # and replace the temp dir with the host dir in the stderr output:
 { docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongodump "$@" 2>&3; } \
-	3>&1 1>&2 | find_and_replace "$TMPDIR" "$HOSTDIR" 1>&2
+	3>&1 1>&2 | replace "$TMPDIR" "$HOSTDIR" 1>&2
 docker exec $MONGODB_CONTAINER test -d $TMPDIR || exit 0
 docker cp $MONGODB_CONTAINER:"$TMPDIR" .
 docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
