@@ -31,9 +31,9 @@ alias mongo="docker exec -it -u mongodb $(cid mongodb) mongo"
 alias mongodump="MONGODB_CONTAINER=$(cid mongodb) $BIN/mongodump.sh"
 alias mongorestore="MONGODB_CONTAINER=$(cid mongodb) $BIN/mongorestore.sh"
 
-alias php="docker exec -u www-data $(cid php) php"
+alias php="docker exec -it -u www-data $(cid php) php"
 alias phpunit="docker exec -u www-data $(cid php) phpunit"
-alias composer="docker exec -u www-data $(cid php) composer"
+alias composer="docker exec -it -u www-data $(cid php) composer"
 ############ alias definitions end ############
 
 # Print the alias statements:
