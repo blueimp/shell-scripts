@@ -26,7 +26,7 @@ if [ "$1" = "--help" ] || [ "$1" = "--version" ]; then
 	exit $?
 fi
 
-TMPDIR="$(mktemp -d /tmp/mongodb-dump-XXXXXXXXXX)"
+TMP_DIR="$(mktemp -d /tmp/mongodb-dump-XXXXXXXXXX)"
 
 SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -39,7 +39,7 @@ replace() {
 }
 
 cleanup() {
-	rm -rf "$TMPDIR"
+	rm -rf "$TMP_DIR"
 }
 
 # Clean up on exit:
@@ -61,7 +61,7 @@ for arg; do
 	if [ $INDEX = $COUNT ] && [ -d "$arg" ]; then
 		HOSTDIR="$arg"
 		# Replace the dump source with the temp dir:
-		arg="$TMPDIR"
+		arg="$TMP_DIR"
 	fi
 	# Rebuild the arguments list with each iteration:
 	set -- "$@" "$arg"
@@ -71,16 +71,16 @@ if [ -z "$HOSTDIR" ]; then
 	# Use the default dump target as host dir:
 	HOSTDIR="$PWD/dump"
 	# Set the temp dir as dump source:
-	set -- "$@" "$TMPDIR"
+	set -- "$@" "$TMP_DIR"
 fi
 
 cd "$HOSTDIR"
 
 # Import the dump data into the running mongodb container:
-docker exec $MONGODB_CONTAINER mkdir -p "$TMPDIR"
-docker cp . $MONGODB_CONTAINER:"$TMPDIR"
+docker exec $MONGODB_CONTAINER mkdir -p "$TMP_DIR"
+docker cp . $MONGODB_CONTAINER:"$TMP_DIR"
 # Restore the imported dump data
 # and replace the temp dir with the host dir in the stderr output:
 { docker exec -u $MONGODB_USER $MONGODB_CONTAINER mongorestore "$@" 2>&3; } \
-	3>&1 1>&2 | replace "$TMPDIR" "$HOSTDIR" 1>&2
-docker exec $MONGODB_CONTAINER rm -rf "$TMPDIR"
+	3>&1 1>&2 | replace "$TMP_DIR" "$HOSTDIR" 1>&2
+docker exec $MONGODB_CONTAINER rm -rf "$TMP_DIR"
