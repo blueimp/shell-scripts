@@ -51,7 +51,7 @@ marker() {
 
 # Updates hosts from STDIN with the mappings in the given config file:
 map_hostnames() {
-	local marker_base="## $(marker "$1")"
+	local marker_base="$(marker "$1")"
 	local marker_start="$marker_base start"
 	local marker_end="$marker_base end"
 
