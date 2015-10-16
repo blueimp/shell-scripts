@@ -37,7 +37,7 @@ elasticsearch:
   ports:
     - "9200:9200"
 php:
-  image: develop/php
+  image: dev/php
   links:
     - mongodb
     - redis
@@ -51,7 +51,7 @@ php:
     - SSH_PUBLIC_KEY
     - SSH_KNOWN_HOSTS
 cron:
-  image: develop/php
+  image: dev/php
   links:
     - mongodb
     - redis
@@ -66,7 +66,7 @@ cron:
     - SSH_KNOWN_HOSTS
   command: "superd"
 nginx:
-  image: develop/nginx
+  image: dev/nginx
   links:
     - php
   volumes_from:

@@ -3,7 +3,7 @@
 #
 # Removes dangling docker images.
 #
-# Usage: ./cleanup.sh
+# Usage: ./cleanup-docker-images.sh
 #
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net

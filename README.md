@@ -21,7 +21,7 @@ See [SECRETS](SECRETS.md) for the secrets generation.
 ### Build the docker development images:
 
 ```sh
-./bin/build.sh
+./bin/build-docker-images.sh
 ```
 
 ### Create the web directory:

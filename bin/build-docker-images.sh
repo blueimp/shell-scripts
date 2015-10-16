@@ -5,7 +5,7 @@
 # Alternatively builds only the Dockerfiles provided as command-line arguments.
 # Also accepts directories containing a default Dockerfile as arguments.
 #
-# Usage: ./build.sh [Dockerfile|directory] [...]
+# Usage: ./build-docker-images.sh [Dockerfile|directory] [...]
 #
 # Tags images based on git branch names, with "master" being tagged as "latest".
 # Resolves image dependencies for images in the same project.
