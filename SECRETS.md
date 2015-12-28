@@ -1,6 +1,6 @@
 # Secrets generation
 
-This guide generates the secrets used in the container services. 
+This guide generates the secrets used in the container services.
 
 ## Generate a self-signed SSL certificate for nginx:
 
@@ -10,7 +10,14 @@ mkdir -p secrets/ssl
 openssl req -nodes -new -x509 \
 	-keyout secrets/ssl/dev.test.key \
 	-out secrets/ssl/dev.test.crt
+
+openssl dhparam -out secrets/ssl/dhparam.pem 2048
 ```
+
+The last command generates the Diffie-Hellman Ephemeral Parameters for stronger
+forward secrecy. See also
+[Strong SSL Security on nginx](https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html)
+and the section "Forward Secrecy & Diffie Hellman Ephemeral Parameters".
 
 ## Generate the SSH keypair and known hosts file for git access:
 
