@@ -42,7 +42,8 @@ for image in $(
 		# Ignore excluded images:
 		grep -vE "$EXCLUDE"
 	); do
-	# Pull the latest image version from the docker hub:
-	docker pull "$image"
+	# Pull the latest image version from the docker hub,
+	# while interpolating variables in the image name:
+	docker pull "$(eval "echo $image")"
 	echo # Newline for better readability
 done
