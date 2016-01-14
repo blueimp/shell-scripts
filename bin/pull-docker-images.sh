@@ -31,6 +31,9 @@ fi
 
 echo # Newline for better readability
 
+# Exit on SIGINT and SIGTERM:
+trap 'exit $?' INT TERM
+
 # Iterate over the docker image definitions in a given YAML file:
 for image in $(
 		# Extract lines containing an image definition:
