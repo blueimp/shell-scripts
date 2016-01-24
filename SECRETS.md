@@ -50,7 +50,6 @@ SSL_CRT cat secrets/ssl/dev.test.crt
 SSL_KEY cat secrets/ssl/dev.test.key
 
 SSH_PRIVATE_KEY cat secrets/ssh/id_rsa
-SSH_PUBLIC_KEY cat secrets/ssh/id_rsa.pub
 SSH_KNOWN_HOSTS cat secrets/ssh/known_hosts
 ' > .expenv
 ```

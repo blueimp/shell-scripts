@@ -48,7 +48,6 @@ php:
     - SSMTP_AUTH_USER
     - SSMTP_AUTH_PASS
     - SSH_PRIVATE_KEY
-    - SSH_PUBLIC_KEY
     - SSH_KNOWN_HOSTS
 cron:
   image: dev/php
@@ -62,7 +61,6 @@ cron:
     - SSMTP_AUTH_USER
     - SSMTP_AUTH_PASS
     - SSH_PRIVATE_KEY
-    - SSH_PUBLIC_KEY
     - SSH_KNOWN_HOSTS
   command: "superd"
 nginx:
