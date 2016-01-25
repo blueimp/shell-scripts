@@ -30,7 +30,7 @@ elasticsearchdata:
   volumes:
     - /usr/share/elasticsearch/data
 elasticsearch:
-  image: blueimp/elasticsearch:1.6
+  image: blueimp/elasticsearch:2.1
   volumes_from:
     - elasticsearchdata
   # Debug access:
