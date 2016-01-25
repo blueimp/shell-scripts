@@ -8,7 +8,7 @@ mongodbdata:
   volumes:
     - /data/db
 mongodb:
-  image: blueimp/mongodb:3.0
+  image: blueimp/mongodb:3.2
   volumes_from:
     - mongodbdata
   # Debug access:
