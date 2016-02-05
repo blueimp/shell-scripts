@@ -27,9 +27,31 @@ docker_machine_bridged_ip() {
     grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
 }
 
+# Checks if the given docker machine has the eth2 network adapter.
+# This assumes that the eth2 network adapter is bridged to the host network:
+has_bridged_interface() {
+  docker-machine ssh "$1" ip link show eth2 > /dev/null 2>&1
+}
+
+validate_machine_name() {
+  VBoxManage list vms | grep -w "\"$1\"" > /dev/null
+}
+
+init_machine_name() {
+  MACHINE="${1:-default}"
+  if ! validate_machine_name "$MACHINE"; then
+    echo "Invalid machine name: $MACHINE" >&2
+    exit 1
+  fi
+}
+
 # Returns the bridged host interfaces available to the VirtualBox VM:
 bridgedifs() {
   VBoxManage list bridgedifs | grep -w 'Name:' | sed 's/Name:[ \t]*//'
+}
+
+validate_network_adapter() {
+  [ ! -z "$1" ] && bridgedifs | grep -w "$1" > /dev/null
 }
 
 print_bridgedifs_selection() {
@@ -40,34 +62,33 @@ print_bridgedifs_selection() {
   echo '===================='
 }
 
-validate_machine_name() {
-  VBoxManage list vms | grep -w "\"$MACHINE\"" > /dev/null
-}
-
-validate_network_adapter() {
-  [ ! -z "$NETWORK_ADAPTER" ] && bridgedifs |
-    grep -w "$NETWORK_ADAPTER" > /dev/null
-}
-
 select_network_adapter() {
-  while ! validate_network_adapter; do
+  while ! validate_network_adapter "$NETWORK_ADAPTER"; do
     print_bridgedifs_selection && read -r NETWORK_ADAPTER
   done
+  echo
+}
+
+# Stops the machine, executes the given command line and restarts the machine:
+execute_and_restart() {
+  docker-machine stop "$MACHINE" || true
+  # Execute the given command line:
+  "$@"
+  docker-machine start "$MACHINE"
 }
 
 add_bridged_network_adapter() {
-  docker-machine stop "$MACHINE" || true
   echo "Adding bridged network adapter to $MACHINE VM ..."
-  VBoxManage modifyvm "$MACHINE" --nic3 bridged \
-    --bridgeadapter3 "$NETWORK_ADAPTER"
-  docker-machine start "$MACHINE"
+  execute_and_restart \
+    VBoxManage modifyvm "$MACHINE" \
+      --nic3 bridged --bridgeadapter3 "$NETWORK_ADAPTER" --nictype3 82540EM
 }
 
 remove_bridged_network_adapter() {
-  docker-machine stop "$MACHINE" || true
   echo "Removing bridged network adapter from $MACHINE VM ..."
-  VBoxManage modifyvm "$MACHINE" --nic3 none
-  docker-machine start "$MACHINE"
+  execute_and_restart \
+    VBoxManage modifyvm "$MACHINE" \
+      --nic3 none
 }
 
 if [ "$1" = '-i' ]; then
@@ -77,23 +98,15 @@ fi
 
 if [ "$1" = '-d' ]; then
   shift
-  MACHINE="${1:-default}"
-  remove_bridged_network_adapter >&2
-  exit
+  init_machine_name "$1"
+  if has_bridged_interface "$MACHINE"; then
+    remove_bridged_network_adapter >&2
+  fi
+else
+  init_machine_name "$1"
+  if ! has_bridged_interface "$MACHINE"; then
+    select_network_adapter >&2
+    add_bridged_network_adapter >&2
+  fi
+  docker_machine_bridged_ip "$MACHINE"
 fi
-
-MACHINE="${1:-default}"
-
-validate_machine_name || (echo "Invalid machine name: $MACHINE" >&2 && exit 1)
-
-IP="$(docker_machine_bridged_ip "$MACHINE" 2> /dev/null || true)"
-
-if [ -z "$IP" ]; then
-  select_network_adapter >&2
-  add_bridged_network_adapter >&2
-  # Wait for the machine to retrieve its IP from the DHCP server:
-  sleep 2
-  IP="$(docker_machine_bridged_ip "$MACHINE")"
-fi
-
-echo "$IP"
