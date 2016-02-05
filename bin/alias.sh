@@ -15,6 +15,9 @@
 # http://www.opensource.org/licenses/MIT
 #
 
+# The vendor name:
+VENDOR='app'
+
 # The escaped bin dir path:
 BIN="'$(cd "$(dirname "$0")" && pwd | sed "s/'/'\\\''/g")'"
 
@@ -34,6 +37,13 @@ alias mongorestore="MONGODB_CONTAINER=$(cid mongodb) $BIN/mongorestore.sh"
 alias php="docker exec -it -u www-data $(cid php) php"
 alias phpunit="docker exec -u www-data $(cid php) phpunit"
 alias composer="docker exec -it -u www-data $(cid php) composer"
+
+# Add a vendor-prefixed alias for each shell script in the bin dir:
+for SCRIPT in $(cd "$(dirname "$0")" && ls *.sh); do
+  if [ "$SCRIPT" != "$(basename "$0")" ]; then
+    alias "$VENDOR-${SCRIPT%.*}=$BIN/$SCRIPT"
+  fi
+done
 ############ alias definitions end ############
 
 # Print the alias statements:
