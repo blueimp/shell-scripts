@@ -35,7 +35,7 @@ alias mongodump="MONGODB_CONTAINER=$(cid mongodb) $BIN/mongodump.sh"
 alias mongorestore="MONGODB_CONTAINER=$(cid mongodb) $BIN/mongorestore.sh"
 
 alias php="docker exec -it -u www-data $(cid php) php"
-alias phpunit="docker exec -u www-data $(cid php) phpunit"
+alias phpunit="docker exec -it -u www-data $(cid php) phpunit"
 alias composer="docker exec -it -u www-data $(cid php) composer"
 
 # Add a vendor-prefixed alias for each shell script in the bin dir:
