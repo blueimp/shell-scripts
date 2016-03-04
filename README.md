@@ -22,22 +22,22 @@ docker-compose | 1.6+
 ### Secrets generation
 See [SECRETS](SECRETS.md) for the secrets generation.
 
+### Source the environment variables and command aliases:
+
+```sh
+. .env
+```
+
 ### Build the docker development images:
 
 ```sh
-./bin/build-docker-images.sh
+app-build-docker-images
 ```
 
 ### Create the web directory:
 
 ```sh
-mkdir ../web
-```
-
-### Source the environment variables and command aliases:
-
-```sh
-. .env
+mkdir -p ../web
 ```
 
 ### Start the development environment:
@@ -49,7 +49,7 @@ docker-compose up -d
 ### Update the hosts file with the development hostname:
 
 ```sh
-./bin/hostnames.sh
+app-hostnames
 ```
 
 ### Open the development website:
