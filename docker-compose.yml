@@ -49,20 +49,6 @@ php:
     - SSMTP_AUTH_PASS
     - SSH_PRIVATE_KEY
     - SSH_KNOWN_HOSTS
-cron:
-  image: dev/php
-  links:
-    - mongodb
-    - redis
-    - elasticsearch
-  volumes_from:
-    - webdata
-  environment:
-    - SSMTP_AUTH_USER
-    - SSMTP_AUTH_PASS
-    - SSH_PRIVATE_KEY
-    - SSH_KNOWN_HOSTS
-  command: "superd"
 nginx:
   image: dev/nginx
   links:
