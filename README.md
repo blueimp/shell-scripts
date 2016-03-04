@@ -12,8 +12,12 @@ It comes preconfigured with the following container services:
 
 ## Setup
 
-### Installation requirements
-See [INSTALL](INSTALL.md) for the installation requirements.
+### Requirements
+
+Program        | Version
+-------------- | -------
+docker         | 1.10+
+docker-compose | 1.6+
 
 ### Secrets generation
 See [SECRETS](SECRETS.md) for the secrets generation.
