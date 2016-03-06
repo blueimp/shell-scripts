@@ -7,9 +7,10 @@ This guide generates the secrets used in the container services.
 ```sh
 mkdir -p secrets/ssl
 
-openssl req -nodes -new -x509 \
-	-keyout secrets/ssl/dev.test.key \
-	-out secrets/ssl/dev.test.crt
+openssl req -nodes -x509 -newkey rsa:2048 \
+  -subj '/C=/ST=/L=/O=/OU=/CN=dev.test' \
+  -keyout ssl/default.key \
+  -out ssl/default.crt
 
 openssl dhparam -out secrets/ssl/dhparam.pem 2048
 ```
