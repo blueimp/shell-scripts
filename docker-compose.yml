@@ -14,7 +14,7 @@ redis:
   ports:
     - "6379:6379"
 elasticsearch:
-  image: blueimp/elasticsearch:2.1
+  image: blueimp/elasticsearch:2.2
   # Debug access:
   ports:
     - "9200:9200"
