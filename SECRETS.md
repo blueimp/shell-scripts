@@ -47,8 +47,8 @@ echo '
 SSMTP_AUTH_USER echo mail@dev.test
 SSMTP_AUTH_PASS echo password
 
-SSL_CRT cat secrets/ssl/dev.test.crt
-SSL_KEY cat secrets/ssl/dev.test.key
+SSL_CRT cat secrets/ssl/default.crt
+SSL_KEY cat secrets/ssl/default.key
 
 SSH_PRIVATE_KEY cat secrets/ssh/id_rsa
 SSH_KNOWN_HOSTS cat secrets/ssh/known_hosts

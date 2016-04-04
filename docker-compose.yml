@@ -1,8 +1,8 @@
 webdata:
-  # Mapping host volume for development:
   image: tianon/true
+  # Mapping host volume for development:
   volumes:
-    - "../web:/srv/www/dev.test"
+    - "../web:/usr/share/nginx/html"
 mongodb:
   image: blueimp/mongodb:3.2
   # Debug access:
