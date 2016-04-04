@@ -9,8 +9,8 @@ mkdir -p secrets/ssl
 
 openssl req -nodes -x509 -newkey rsa:2048 \
   -subj '/C=/ST=/L=/O=/OU=/CN=dev.test' \
-  -keyout ssl/default.key \
-  -out ssl/default.crt
+  -keyout secrets/ssl/default.key \
+  -out secrets/ssl/default.crt
 
 openssl dhparam -out secrets/ssl/dhparam.pem 2048
 ```
