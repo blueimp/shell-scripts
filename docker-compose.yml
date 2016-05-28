@@ -1,42 +1,7 @@
-webdata:
-  image: tianon/true
-  # Mapping host volume for development:
-  volumes:
-    - "../web:/usr/share/nginx/html"
-mongodb:
-  image: blueimp/mongodb:3.2
-  # Debug access:
-  ports:
-    - "27017:27017"
-redis:
-  image: blueimp/redis:3.0
-  # Debug access:
-  ports:
-    - "6379:6379"
-elasticsearch:
-  image: blueimp/elasticsearch:2.2
-  # Debug access:
-  ports:
-    - "9200:9200"
-php:
-  image: dev/php
-  links:
-    - mongodb
-    - redis
-    - elasticsearch
-  volumes_from:
-    - webdata
-  environment:
-    - SSMTP_AUTH_USER
-    - SSMTP_AUTH_PASS
-    - SSH_PRIVATE_KEY
-    - SSH_KNOWN_HOSTS
 nginx:
   image: dev/nginx
-  links:
-    - php
-  volumes_from:
-    - webdata
+  volumes:
+    - "../web:/var/lib/nginx/html"
   environment:
     - DH_PARAM
     - SSL_CRT

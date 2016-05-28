@@ -1,14 +1,7 @@
 # Docker development environment
 
 ## Description
-This project provides a convenient docker development environment.  
-It comes preconfigured with the following container services:
-
-* nginx
-* php
-* redis
-* mongodb
-* elasticsearch
+This project provides a sample docker development environment.
 
 ## Setup
 
@@ -16,7 +9,7 @@ It comes preconfigured with the following container services:
 
 Program        | Version
 -------------- | -------
-docker         | 1.10+
+docker         | 1.9+
 docker-compose | 1.6+
 
 ### Secrets generation
@@ -56,33 +49,6 @@ app-hostnames
 
 ```sh
 open https://dev.test/
-```
-
-### Use aliases to execute commands in docker containers:
-
-```sh
-php --version
-
-phpunit --version
-
-composer --version
-
-redis-cli --version
-
-mongo --version
-
-mongorestore --version
-
-mongodump --version
-```
-
-#### Command Working directory
-The working directory for a binary is set to that of its container,
-e.g. `/srv/www` for the php container and its php binaries.  
-As a result, we have to take this working directory into account, e.g.:
-
-```sh
-composer status -d dev.test
 ```
 
 ## License
