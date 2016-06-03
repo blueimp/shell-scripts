@@ -2,8 +2,7 @@
 
 #
 # Builds images for each Dockerfile found recursively in the current directory.
-# Alternatively builds only the Dockerfiles provided as command-line arguments.
-# Also accepts directories containing a default Dockerfile as arguments.
+# Also accepts Dockerfiles and directories to search for as arguments.
 #
 # Usage: ./build-docker-images.sh [Dockerfile|directory] [...]
 #
@@ -30,9 +29,10 @@ build_versions() {
 		docker build -t "$image" .
 		return $?
 	fi
-	current_branch=$(git rev-parse --abbrev-ref HEAD)
+	local current_branch=$(git rev-parse --abbrev-ref HEAD)
 	# Iterate over all branches:
 	local branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
+	local branch
 	for branch in $branches; do
 		git checkout $branch
 		# Tag master as "latest":
@@ -47,19 +47,9 @@ build_versions() {
 
 # Builds an image for each git branch of the given Dockerfile directory:
 build() {
+	local file="$(basename "$1")"
+	local dir="$(dirname "$1")"
 	local cwd="$PWD"
-	if [ -f "$1" ]; then
-		local file="$(basename "$1")"
-		local dir="$(dirname "$1")"
-	else
-		# Use the default Dockerfile if the argument is a directory:
-		local file='Dockerfile'
-		local dir="$1"
-		if [ ! -f "$dir/$file" ]; then
-			echo "$dir/$file is not a valid file." >&2
-			return 1
-		fi
-	fi
 	cd "$dir"
 	# Use the parent folder for the project name:
 	local project="$(cd .. && normalize "$(basename "$PWD")")"
@@ -92,9 +82,15 @@ build_images() {
 		echo 'Could not resolve image dependencies.' >&2
 		return 1
 	fi
+	local file
 	for file; do
 		# Shift the arguments list to remove the current Dockerfile:
 		shift
+		# Baisc check if the file is a valid Dockerfile:
+		if ! grep '^FROM ' "$file"; then
+			echo "Invalid Dockerfile: $file" >&2
+			continue
+		fi
 		if ! build "$file"; then
 			# The current build requires another image as dependency,
 			# so we add it to the end of the build list and start over:
@@ -106,5 +102,24 @@ build_images() {
 
 MAX_CALLS=0
 CALLS=0
+NEWLINE='
+'
 
-build_images ${@:-$(find . -name Dockerfile)}
+# Parses the arguments, finds Dockerfiles and starts the builds:
+init() {
+	local args=''
+	local arg
+	for arg; do
+		if [ -d "$arg" ]; then
+			# Search for Dockerfiles and add them to the list:
+			args="$args$NEWLINE$(find "$arg" -name Dockerfile)"
+		else
+			args="$args$NEWLINE$arg"
+		fi
+	done
+	# Set the list as arguments, splitting only at newlines:
+	IFS="$NEWLINE"; set -- $args; unset IFS
+	build_images "$@"
+}
+
+init "${@:-.}"
