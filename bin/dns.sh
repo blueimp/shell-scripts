@@ -33,7 +33,7 @@ map_hostname_file() {
 map_hostname_files() {
   local hostnames=''
   local file
-  for file in "$@"; do
+  for file; do
   	if [ ! -f "$file" ]; then
   		echo "$file is not a valid file." >&2
   		continue
