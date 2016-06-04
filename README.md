@@ -1,54 +1,41 @@
-# Docker development environment
+# Docker tools
 
 ## Description
-This project provides a sample docker development environment.
+A collection of POSIX compatible shell scripts as additions to a Docker based
+development environment.
 
-## Setup
+## Tools
 
-### Requirements
-
-Program        | Version
--------------- | -------
-docker         | 1.9+
-docker-compose | 1.6+
-
-### Secrets generation
-See [SECRETS](SECRETS.md) for the secrets generation.
-
-### Source the environment variables and command aliases:
+### docker-build-images.sh
+Builds images for each Dockerfile found recursively in the current directory.  
+Also accepts Dockerfiles and directories to search for as arguments.
 
 ```sh
-. .env
+./docker-build-images.sh [Dockerfile|directory] [...]
 ```
 
-### Build the docker development images:
+Tags images based on git branch names, with `master` being tagged as `latest`.  
+Resolves image dependencies for images in the same project.
+
+### docker-hostnames.sh
+Updates hostnames for the docker host IP or `127.0.0.1` in `/etc/hosts`.
 
 ```sh
-app-build-docker-images
+./docker-hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 ```
 
-### Create the web directory:
+### docker-image-cleanup.sh
+Removes dangling docker images.
 
 ```sh
-mkdir -p ../web
+./docker-image-cleanup.sh
 ```
 
-### Start the development environment:
+### docker-image-exists.sh
+Checks if a given docker image exists.
 
 ```sh
-docker-compose up -d
-```
-
-### Update the hosts file with the development hostname:
-
-```sh
-app-hostnames
-```
-
-### Open the development website:
-
-```sh
-open https://dev.test/
+./docker-image-exists.sh image[:tag]
 ```
 
 ## License

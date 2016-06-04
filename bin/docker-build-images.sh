@@ -4,7 +4,7 @@
 # Builds images for each Dockerfile found recursively in the current directory.
 # Also accepts Dockerfiles and directories to search for as arguments.
 #
-# Usage: ./build-docker-images.sh [Dockerfile|directory] [...]
+# Usage: ./docker-build-images.sh [Dockerfile|directory] [...]
 #
 # Tags images based on git branch names, with "master" being tagged as "latest".
 # Resolves image dependencies for images in the same project.
