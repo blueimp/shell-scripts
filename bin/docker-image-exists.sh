@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck shell=dash
 
 #
 # Checks if a given docker image exists.
@@ -22,9 +23,6 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-# Absolute path to the project dir:
-PROJECT_DIR="$(cd "$(dirname "$0")/../" && pwd)"
-
 # Parse aguments:
 IMAGE="${1%:*}"
 TAG="${1##*:}"
@@ -33,8 +31,8 @@ if [ "$IMAGE" = "$TAG" ]; then
 fi
 
 # Retrieve Docker Basic Authentication token:
-BASIC_AUTH="$(cat "$HOME/.docker/config.json" |
-  jq -r '.auths["https://index.docker.io/v1/"].auth')"
+BASIC_AUTH="$(jq -r '.auths["https://index.docker.io/v1/"].auth' \
+  "$HOME/.docker/config.json")"
 
 # Define Docker access scope:
 SCOPE="repository:$IMAGE:pull"

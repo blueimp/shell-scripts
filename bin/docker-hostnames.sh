@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck shell=dash
 
 #
 # Updates hostnames for the docker host IP or 127.0.0.1 in /etc/hosts.
@@ -38,20 +39,23 @@ fi
 
 # Normalizes according to docker-compose project naming rules:
 normalize() {
-	echo "$1" | tr '[A-Z]' '[a-z]' | sed s/[^a-z0-9]//g
+	echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]//g'
 }
 
 # Returns a marker to identify the hostname settings in /etc/hosts:
 marker() {
 	# Use the config file folder as project name:
-	local project="$(normalize "$(basename "$(cd "$(dirname "$1")" && pwd)")")"
-	local config_name="$(normalize "$(basename "$1")")"
+	local project
+	project="$(normalize "$(basename "$(cd "$(dirname "$1")" && pwd)")")"
+	local config_name
+	config_name="$(normalize "$(basename "$1")")"
 	echo "## $project $config_name"
 }
 
 # Updates hosts from STDIN with the mappings in the given config file:
 map_hostnames() {
-	local marker_base="$(marker "$1")"
+	local marker_base
+	marker_base="$(marker "$1")"
 	local marker_start="$marker_base start"
 	local marker_end="$marker_base end"
 	# Remove the current hostnames section:
@@ -61,7 +65,7 @@ map_hostnames() {
 	# Add the new hostname settings:
 	echo "$marker_start"
 	local line
-	while read line; do
+	while read -r line; do
 		# Skip empty lines and lines starting with a hash (#):
 	  ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
 	  # Add each hostname entry with the $DOCKER_HOST_IP as mapping:
@@ -72,7 +76,8 @@ map_hostnames() {
 
 get_hosts_content() {
 	# Retrieve the current host settings:
-	local hosts_content="$(cat /etc/hosts)"
+	local hosts_content
+	hosts_content="$(cat /etc/hosts)"
 	local file
 	for file; do
 		if [ ! -f "$file" ]; then
@@ -89,7 +94,8 @@ get_hosts_content() {
 update_hosts() {
 	local hosts_content="$1"
 	# Diff /etc/hosts with the new content:
-	local hosts_diff="$(echo "$hosts_content" | diff /etc/hosts -)"
+	local hosts_diff
+	hosts_diff="$(echo "$hosts_content" | diff /etc/hosts -)"
 	if [ ! "$hosts_diff" ]; then
 	  echo 'No updates to /etc/hosts required.'
 	  return
@@ -102,10 +108,10 @@ update_hosts() {
 	echo 'This will require Administrator privileges.'
 	echo 'Please type "y" if you wish to proceed.'
 	local confirmation
-	read confirmation
+	read -r confirmation
 	if [ "$confirmation" = "y" ]; then
 	  # Check if we have root access:
-	  if [ $(id -u) -eq 0 ]; then
+	  if [ "$(id -u)" -eq 0 ]; then
 	    echo "$hosts_content" > /etc/hosts
 	  else
 	    # Get root access and then write the new hosts file:

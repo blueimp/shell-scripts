@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck shell=dash
 
 #
 # Builds images for each Dockerfile found recursively in the current directory.
@@ -18,7 +19,7 @@
 
 # Normalizes according to docker hub project/tag naming conventions:
 normalize() {
-	echo "$1" | tr '[A-Z]' '[a-z]' | sed 's/[^a-z0-9._-]//g'
+	echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g'
 }
 
 # Build and tag the image based on the git branches in the current directory:
@@ -29,12 +30,14 @@ build_versions() {
 		docker build -t "$image" .
 		return $?
 	fi
-	local current_branch=$(git rev-parse --abbrev-ref HEAD)
+	local current_branch
+	current_branch=$(git rev-parse --abbrev-ref HEAD)
 	# Iterate over all branches:
-	local branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
+	local branches
+	branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
 	local branch
 	for branch in $branches; do
-		git checkout $branch
+		git checkout "$branch"
 		# Tag master as "latest":
 		if [ "$branch" = 'master' ]; then
 			branch='latest'
@@ -47,37 +50,42 @@ build_versions() {
 
 # Builds an image for each git branch of the given Dockerfile directory:
 build() {
-	local file="$(basename "$1")"
-	local dir="$(dirname "$1")"
 	local cwd="$PWD"
-	cd "$dir"
+	local file
+	file="$(basename "$1")"
+	local dir
+	dir="$(dirname "$1")"
+	cd "$dir" || return 1
 	# Use the parent folder for the project name:
-	local project="$(cd .. && normalize "$(basename "$PWD")")"
+	local project
+	project="$(cd .. && normalize "$(basename "$PWD")")"
 	# Use the current folder for the image name:
-	local image="$project/$(normalize "$(basename "$PWD")")"
+	local image
+	image="$project/$(normalize "$(basename "$PWD")")"
 	# Check if the image depends on another image of the same project:
-	local from=$(grep "^FROM $project/" "$file" | awk '{print $2}')
+	local from
+	from=$(grep "^FROM $project/" "$file" | awk '{print $2}')
 	# If it does, only build if the image is already available:
 	if [ -z "$from" ] || docker inspect "$from" > /dev/null 2>&1; then
-		build_versions $image
+		build_versions "$image"
 	else
 		echo "$image requires $from ..." >&2 && false
 	fi
 	local status=$?
-	cd "$cwd"
+	cd "$cwd" || return 1
 	return $status
 }
 
 # Builds and tags images for each Dockerfile in the arguments list:
 build_images() {
 	# Set the maximum number of calls on the first run:
-	if [ $MAX_CALLS = 0 ]; then
+	if [ "$MAX_CALLS" = 0 ]; then
 		# Worst case scenario needs n*(n+1)/2 calls for dependency resolution,
 		# which is the sum of all natural numbers (1+2+3+4+...n).
 		# n is the number of arguments (=Dockerfiles) provided:
 		MAX_CALLS=$(($#*($#+1)/2))
 	fi
-	CALLS=$(($CALLS+1))
+	CALLS=$((CALLS+1))
 	if [ $CALLS -gt $MAX_CALLS ]; then
 		echo 'Could not resolve image dependencies.' >&2
 		return 1
@@ -118,7 +126,10 @@ init() {
 		fi
 	done
 	# Set the list as arguments, splitting only at newlines:
-	IFS="$NEWLINE"; set -- $args; unset IFS
+	IFS="$NEWLINE";
+	# shellcheck disable=SC2086
+	set -- $args;
+	unset IFS
 	build_images "$@"
 }
 
