@@ -3,6 +3,7 @@
 
 #
 # Updates hostnames for the docker host IP or 127.0.0.1 in /etc/hosts.
+# 
 # Usage: ./docker-hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
