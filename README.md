@@ -38,6 +38,13 @@ Checks if a given docker image exists.
 ./docker-image-exists.sh image[:tag]
 ```
 
+### docker-machine-bridge.sh
+Adds a bridged network adapter to a VirtualBox docker machine.
+
+```sh
+./docker-machine-bridge.sh [-i network_adapter] [-d] [machine]
+```
+
 ## License
 Released under the [MIT license](http://opensource.org/licenses/MIT).
 
