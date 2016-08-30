@@ -3,7 +3,7 @@
 
 #
 # Updates hostnames for the docker host IP or 127.0.0.1 in /etc/hosts.
-# 
+#
 # Usage: ./docker-hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
@@ -68,7 +68,7 @@ map_hostnames() {
 	local line
 	while read -r line; do
 		# Skip empty lines and lines starting with a hash (#):
-	  ([ -z "$line" ] || [ "${line#\#}" != "$line" ]) && continue
+	  [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
 	  # Add each hostname entry with the $DOCKER_HOST_IP as mapping:
 	  printf '%s\t%s\n' "$DOCKER_HOST_IP" "$line"
 	done < "$1"
