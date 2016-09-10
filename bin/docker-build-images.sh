@@ -2,13 +2,20 @@
 # shellcheck shell=dash
 
 #
-# Builds images for each Dockerfile found recursively in the current directory.
-# Also accepts Dockerfiles and directories to search for as arguments.
+# Builds images for each Dockerfile found recursively in the given directory.
+# Resolves image dependencies for images in the same organization.
+# Tags images based on the directory structure and git branch names.
 #
 # Usage: ./docker-build-images.sh [Dockerfile|directory] [...]
 #
-# Tags images based on git branch names, with "master" being tagged as "latest".
-# Resolves image dependencies for images in the same project.
+# The parent directory basename is used as the user/organization name.
+# The current directory basename is used as the repository name.
+# The branch is used as the version, with "master" being tagged as "latest".
+# e.g.: parentdir/currentdir:latest
+#
+# If DOCKER_ORG is defined, it is used as the user/organization name.
+# If DOCKER_HUB is defined, it is prefixed to the user/organization name.
+# e.g.: $DOCKER_HUB/$DOCKER_ORG/repository:latest
 #
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net
@@ -17,7 +24,7 @@
 # http://www.opensource.org/licenses/MIT
 #
 
-# Normalizes according to docker hub project/tag naming conventions:
+# Normalizes according to docker hub organization/image naming conventions:
 normalize() {
 	echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]//g'
 }
@@ -56,15 +63,20 @@ build() {
 	local dir
 	dir="$(dirname "$1")"
 	cd "$dir" || return 1
-	# Use the parent folder for the project name:
-	local project
-	project="$(cd .. && normalize "$(basename "$PWD")")"
-	# Use the current folder for the image name:
+	local organization="$DOCKER_ORG"
+	if [ -z "$organization" ]; then
+		# Use the parent folder for the organization/user name:
+		organization="$(cd .. && normalize "$(basename "$PWD")")"
+	fi
+	if [ ! -z "$DOCKER_HUB" ]; then
+		organization="$DOCKER_HUB/$organization"
+	fi
 	local image
-	image="$project/$(normalize "$(basename "$PWD")")"
-	# Check if the image depends on another image of the same project:
+	# Use the current folder for the image name:
+	image="$organization/$(normalize "$(basename "$PWD")")"
+	# Check if the image depends on another image of the same organization:
 	local from
-	from=$(grep "^FROM $project/" "$file" | awk '{print $2}')
+	from=$(grep "^FROM $organization/" "$file" | awk '{print $2}')
 	# If it does, only build if the image is already available:
 	if [ -z "$from" ] || docker inspect "$from" > /dev/null 2>&1; then
 		build_versions "$image"
