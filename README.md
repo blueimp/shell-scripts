@@ -24,11 +24,11 @@ Updates hostnames for the docker host IP or `127.0.0.1` in `/etc/hosts`.
 ./docker-hostnames.sh [-d] [config_file_1] [config_file_2] [...]
 ```
 
-### docker-image-cleanup.sh
+### docker-cleanup-images.sh
 Removes dangling docker images.
 
 ```sh
-./docker-image-cleanup.sh
+./docker-cleanup-images.sh
 ```
 
 ### docker-image-exists.sh
