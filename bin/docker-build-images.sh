@@ -32,9 +32,10 @@ normalize() {
 # Build and tag the image based on the git branches in the current directory:
 build_versions() {
 	local image="$1"
+	shift
 	if [ ! -d '.git' ]; then
 		# Not a git repository, so simply build a "latest" image version:
-		docker build -t "$image" .
+		docker build -t "$image" "$@" .
 		return $?
 	fi
 	local current_branch
@@ -50,7 +51,7 @@ build_versions() {
 			branch='latest'
 		fi
 		# Build and tag the image with the branch name:
-		docker build -t "$image:$branch" .
+		docker build -t "$image:$branch" "$@" .
 	done
 	git checkout "$current_branch"
 }
@@ -79,7 +80,7 @@ build() {
 	from=$(grep "^FROM $organization/" "$file" | awk '{print $2}')
 	# If it does, only build if the image is already available:
 	if [ -z "$from" ] || docker inspect "$from" > /dev/null 2>&1; then
-		build_versions "$image"
+		build_versions "$image" -f "$file"
 	else
 		echo "$image requires $from ..." >&2 && false
 	fi
