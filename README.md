@@ -46,7 +46,7 @@ Adds a bridged network adapter to a VirtualBox docker machine.
 ```
 
 ## License
-Released under the [MIT license](http://opensource.org/licenses/MIT).
+Released under the [MIT license](https://opensource.org/licenses/MIT).
 
 ## Author
 [Sebastian Tschan](https://blueimp.net/)

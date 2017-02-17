@@ -12,7 +12,7 @@
 # https://blueimp.net
 #
 # Licensed under the MIT license:
-# http://www.opensource.org/licenses/MIT
+# https://opensource.org/licenses/MIT
 #
 
 # Exit immediately if a command exits with a non-zero status:

@@ -17,7 +17,7 @@
 # https://blueimp.net
 #
 # Licensed under the MIT license:
-# http://www.opensource.org/licenses/MIT
+# https://opensource.org/licenses/MIT
 #
 
 if [ "$1" = '-d' ]; then
