@@ -31,8 +31,16 @@ if [ "$IMAGE" = "$TAG" ]; then
 fi
 
 # Retrieve Docker Basic Authentication token:
-BASIC_AUTH="$(jq -r '.auths["https://index.docker.io/v1/"].auth' \
-  "$HOME/.docker/config.json")"
+CREDS_STORE="$(jq -r '.credsStore' "$HOME/.docker/config.json")"
+if [ -z "$CREDS_STORE" ]; then
+  BASIC_AUTH="$(jq -r '.auths["https://index.docker.io/v1/"].auth' \
+    "$HOME/.docker/config.json")"
+else
+  BASIC_AUTH=$(echo https://index.docker.io/v1/ |
+    docker-credential-"$CREDS_STORE" get |
+    jq -j '"\(.Username):\(.Secret)"' |
+    base64)
+fi
 
 # Define Docker access scope:
 SCOPE="repository:$IMAGE:pull"
