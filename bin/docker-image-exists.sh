@@ -32,7 +32,7 @@ fi
 
 # Retrieve Docker Basic Authentication token:
 CREDS_STORE="$(jq -r '.credsStore' "$HOME/.docker/config.json")"
-if [ -z "$CREDS_STORE" ]; then
+if [ "$CREDS_STORE" = null ]; then
   BASIC_AUTH="$(jq -r '.auths["https://index.docker.io/v1/"].auth' \
     "$HOME/.docker/config.json")"
 else
