@@ -119,6 +119,7 @@ update_hosts() {
 	    echo "$hosts_content" | sudo tee /etc/hosts > /dev/null
 	  fi
 	  # Check if the last command failed:
+		# shellcheck disable=SC2181
 	  if [ $? -eq 0 ]; then
 	    echo "Successfully updated /etc/hosts."
 	    return
