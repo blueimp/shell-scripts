@@ -2,6 +2,7 @@
 A collection of (mostly POSIX compatible) shell scripts:
 
 * [apply-commit-times](bin/apply-commit-times.sh)
+* [aws-ec2-private-ip](bin/aws-ec2-private-ip.sh)
 * [aws-ssm-secrets](bin/aws-ssm-secrets.sh)
 * [docker-build-images](bin/docker-build-images.sh)
 * [docker-hostnames](bin/docker-hostnames.sh)
