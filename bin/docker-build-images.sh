@@ -50,6 +50,8 @@ build_versions() {
 		if [ "$branch" = 'master' ]; then
 			branch='latest'
 		fi
+		# Normalize the branch name:
+		branch="$(normalize "$branch")"
 		# Build and tag the image with the branch name:
 		docker build -t "$image:$branch" "$@" .
 	done
