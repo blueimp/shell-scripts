@@ -50,6 +50,11 @@ S3_HOSTED_ZONE_ID=${REGION_MAPPING#*=}
 HOSTNAME=${1:?}
 REDIRECT_HOSTNAME=${2:-www.$1}
 
+# Extract the root domain:
+TLD=${HOSTNAME##*.}
+SUBDOMAIN_PARTS=${HOSTNAME%.*.$TLD}
+ROOT_DOMAIN=${HOSTNAME#$SUBDOMAIN_PARTS.}
+
 WEBSITE_CONFIGURATION=$(printf '{
   "RedirectAllRequestsTo": {
     "HostName": "%s",
@@ -106,7 +111,7 @@ fi
 put_bucket_website "$HOSTNAME" "$WEBSITE_CONFIGURATION"
 echo "$WEBSITE_CONFIGURATION"
 
-HOSTED_ZONE_ID=$(get_hosted_zone_id "$HOSTNAME")
+HOSTED_ZONE_ID=$(get_hosted_zone_id "$ROOT_DOMAIN")
 if [ ! -z "$HOSTED_ZONE_ID" ]; then
   change_resource_record_sets "$HOSTED_ZONE_ID" "$CHANGE_BATCH"
 fi
