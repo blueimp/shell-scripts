@@ -48,4 +48,4 @@ get_params() {
 }
 
 # Combine params and secrets into unique objects based on their name:
-get_params | jq -s 'group_by(.Name) | map(.[0]+.[1])'
+get_params | jq --slurp --sort-keys 'group_by(.Name) | map(.[0]+.[1])'
