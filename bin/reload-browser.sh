@@ -3,9 +3,13 @@
 #
 # Reloads the active tab of the given browser (defaults to Chrome).
 # Keeps the browser window in the background (Chrome/Safari only).
+# Can optionally execute a given command before reloading the browser tab.
+# Browser reloading is supported on MacOS only for now.
 #
-# Usage: ./macos-reload-browser.sh [chrome|safari|firefox]
+# Usage: ./reload-browser.sh [chrome|safari|firefox] -- [command args...] 
 #
+
+set -e
 
 RELOAD_CHROME='tell application "Google Chrome"
   reload active tab of window 1
@@ -24,4 +28,11 @@ case "$1" in
   *)        OSASCRIPT=$RELOAD_CHROME;;
 esac
 
-exec osascript -e "$OSASCRIPT"
+if shift; then
+  [ "$1" = "--" ] && shift
+  "$@"
+fi
+
+if command -v osascript > /dev/null 2>&1; then
+  exec osascript -e "$OSASCRIPT"
+fi
