@@ -167,7 +167,6 @@ MAIL='HELO '"$HOSTNAME"'
 '"$SENDER_HEADER"'
 '"$RECIPIENTS_HEADERS"'
 DATA
-
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: '"$CONTENT_TRANSFER_ENCODING"'
 Date: '"$DATE"'
