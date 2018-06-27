@@ -85,7 +85,7 @@ quote() {
   local args=""
   for arg; do
     # Escape single quotes:
-    arg="$(echo "$arg" | sed "s/'/'\\\''/g")"
+    arg="$(echo "$arg" | sed "s/'/'\\\\''/g")"
     case "$arg" in
       # Quote arguments containing characters not in the whitelist:
       *[!a-zA-Z0-9_-]*)
