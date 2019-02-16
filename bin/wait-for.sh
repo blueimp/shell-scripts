@@ -1,16 +1,24 @@
 #!/bin/sh
 
 #
-# Waits for the given host(s) to be available via TCP before executing a given
-# command.
+# Waits for the given host(s) to be available before executing a given command.
+# Tests for availability by using netcat to connect to the hosts via TCP.
 #
-# Usage: ./wait.sh [-t timeout] [-q] host:port [...] [-- command args...]
+# Usage: ./wait-for.sh [-q] [-t seconds] [host:port] [...] [-- command args...]
 #
-# It accepts a number of `host:port` combinations to connect to via netcat.
-# The command to execute after each host is reachable can be supplied after the
-# `--` argument.
-# The default timeout of 10 seconds can be changed via `-t timeout` argument.
-# The status output can be made quiet via `-q argument.
+# The status output can be made quiet by adding the `-q` argument or by setting
+# the environment variable WAIT_FOR_QUIET to `1`.
+#
+# The default timeout of 10 seconds can be changed via `-t seconds` argument or
+# by setting the WAIT_FOR_TIMEOUT environment variable to the desired number of
+# seconds.
+#
+# The script accepts multiple `host:port` combinations as arguments or defined
+# as WAIT_FOR_HOSTS environment variable, separating the `host:port`
+# combinations via spaces.
+#
+# The command defined after the `--` argument separator will be executed if all
+# the given hosts are reachable.
 #
 # Copyright 2016, Sebastian Tschan
 # https://blueimp.net
@@ -21,8 +29,8 @@
 
 set -e
 
-TIMEOUT=10
-QUIET=0
+TIMEOUT=${WAIT_FOR_TIMEOUT:-10}
+QUIET=${WAIT_FOR_QUIET:-0}
 
 is_integer() {
   test "$1" -eq "$1" 2> /dev/null
@@ -54,9 +62,9 @@ wait_for_service() {
   if [ "$QUIET" -ne 1 ]; then
     printf 'Waiting for %s to become available ... ' "$1" >&2
   fi
-  time=$(($(date +%s)+TIMEOUT))
+  TIME_LIMIT=$(($(date +%s)+TIMEOUT))
   while ! OUTPUT="$(connect_to_service "$HOST" "$PORT" 2>&1)"; do
-    if [ "$(date +%s)" -gt "$time" ]; then
+    if [ "$(date +%s)" -gt "$TIME_LIMIT" ]; then
       quiet_echo 'timeout'
       if [ -n "$OUTPUT" ]; then
         quiet_echo "$OUTPUT"
@@ -80,7 +88,7 @@ while [ $# != 0 ]; do
       ;;
     --)
       shift
-      exec "$@"
+      break
       ;;
     *)
       wait_for_service "$1"
@@ -88,3 +96,9 @@ while [ $# != 0 ]; do
       ;;
   esac
 done
+
+for SERVICE in $WAIT_FOR_HOSTS; do
+  wait_for_service "$SERVICE"
+done
+
+exec "$@"
