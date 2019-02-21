@@ -5,7 +5,7 @@
 # Takes input from STDIN and prints to STDOUT.
 # Supports multiline replacement strings.
 #
-# Usage: echo "$DATA" | ./search.sh [-r] search_term replacement_string
+# Usage: echo "$DATA" | ./replace.sh [-r] search_term replacement_string
 #
 # If the "-r" option is given, the search term is interpreted as
 # POSIX Basic Regular Expression.
