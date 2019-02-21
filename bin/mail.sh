@@ -1,11 +1,12 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
-# Sends email to the given SMTP server via Netcat.
+# Sends email to the given SMTP server via Netcat/OpenSSL.
+# Supports TLS, STARTTLS and AUTH LOGIN.
 #
 # Usage:
-# echo 'Text' | ./mail.sh [-h host] [-p port] [-f from] [-t to] [-s subject]
+# echo 'Text' | ./mail.sh [-h host] [-p port] [-f from] [-t to] [-s subject] \
+#                         [-c user[:pass]] [-e tls|starttls]
 #
 # Copyright 2016, Sebastian Tschan
 # https://blueimp.net
@@ -30,8 +31,9 @@ NEWLINE='
 '
 
 print_usage() {
-  echo \
-    "Usage: echo 'Text' | $0 [-h host] [-p port] [-f from] [-t to] [-s subject]"
+  echo "Usage: echo 'Text' | $0" \
+    '[-h host] [-p port] [-f from] [-t to] [-s subject]' \
+    '[-c user[:pass]] [-e tls|starttls]'
 }
 
 # Prints the given error and optionally a usage message and exits:
@@ -45,7 +47,6 @@ error_exit() {
 
 # Adds brackets around the last word in the given address, trims whitespace:
 normalize_address() {
-  local address
   address=$(echo "$1" | awk '{$1=$1};1')
   if [ "${address%>}" = "$address" ]; then
     echo "$address" | sed 's/[^ ]*$/<&>/'
@@ -57,9 +58,9 @@ normalize_address() {
 # Does a simple validity check on the email address format,
 # without support for comments or for quoting in the local-part:
 validate_email() {
-  local local_part=${1%%@*>}
+  local_part=${1%%@*>}
   local_part=$(echo "${local_part#<}" | sed 's/[][[:cntrl:][:space:]"(),:;\]//')
-  local domain=${1##<*@}
+  domain=${1##<*@}
   domain=$(echo "${domain%>}" | LC_CTYPE=UTF-8 sed 's/[^][[:alnum:].:-]//')
   if [ "<$local_part@$domain>" != "$1" ]; then
     error_exit "Invalid email address: $1"
@@ -81,9 +82,9 @@ rfc1342_encode() {
 }
 
 encode_address() {
-  local email="<${1##*<}"
+  email="<${1##*<}"
   if [ "$email" != "$1" ]; then
-    local name="${1%<*}"
+    name="${1%<*}"
     # Remove any trailing space as we add it again in the next line:
     name="${name% }"
     echo "$(rfc1342_encode "$name") $email"
@@ -93,11 +94,6 @@ encode_address() {
 }
 
 parse_recipients() {
-  local addresses
-  local address
-  local email
-  local output
-  local recipients
   addresses=$(echo "$TO" | tr ',' '\n')
   IFS="$NEWLINE"
   for address in $addresses; do
@@ -115,7 +111,6 @@ parse_recipients() {
 }
 
 parse_sender() {
-  local email
   FROM="$(normalize_address "$FROM")"
   email="<${FROM##*<}"
   validate_email "$email"
@@ -124,7 +119,6 @@ parse_sender() {
 }
 
 parse_text() {
-  local line
   CONTENT_TRANSFER_ENCODING=7bit
   TEXT=
   while read -r line; do
@@ -144,26 +138,64 @@ parse_text() {
   fi
 }
 
-while getopts ':h:p:f:t:s:' OPT; do
+parse_subject() {
+  SUBJECT="$(rfc1342_encode "$SUBJECT")"
+}
+
+set_date() {
+  DATE=$(date '+%a, %d %b %Y %H:%M:%S %z')
+}
+
+parse_credentials() {
+  USERNAME=${CREDENTIALS%%:*}
+  if [ -z "${CREDENTIALS##*:*}" ]; then
+    PASSWORD=${CREDENTIALS#*:};
+  fi
+  if [ -n "$USERNAME" ]; then
+    GREETING="EHLO $HOSTNAME"
+    GREETING="$GREETING${NEWLINE}AUTH LOGIN"
+    GREETING="$GREETING${NEWLINE}$(printf %s "$USERNAME" | base64)"
+    GREETING="$GREETING${NEWLINE}$(printf %s "$PASSWORD" | base64)"
+  else
+    GREETING="HELO $HOSTNAME"
+  fi
+}
+
+replace_newlines() {
+  awk '{printf "%s\r\n", $0}'
+}
+
+send_mail() {
+  case "$ENCRYPTION" in
+    starttls) openssl s_client -starttls smtp -quiet -connect "$HOST:$PORT";;
+    tls)      openssl s_client -quiet -connect "$HOST:$PORT";;
+    '')       nc "$HOST" "$PORT";;
+    *)        error_exit "Invalid encryption mode: $ENCRYPTION" true;;
+  esac
+}
+
+while getopts ':h:p:f:t:s:c:e:' OPT; do
   case "$OPT" in
-    h)  HOST="$OPTARG";;
-    p)  PORT="$OPTARG";;
-    f)  FROM="$OPTARG";;
-    t)  TO="$OPTARG";;
-    s)  SUBJECT="$OPTARG";;
+    h)  HOST=$OPTARG;;
+    p)  PORT=$OPTARG;;
+    f)  FROM=$OPTARG;;
+    t)  TO=$OPTARG;;
+    s)  SUBJECT=$OPTARG;;
+    c)  CREDENTIALS=$OPTARG;;
+    e)  ENCRYPTION=$OPTARG;;
     :)  error_exit "Option -$OPTARG requires an argument." true;;
     \?) error_exit "Invalid option: -$OPTARG" true;;
   esac
 done
 
+set_date
 parse_recipients
 parse_sender
 parse_text
+parse_subject
+parse_credentials
 
-SUBJECT="$(rfc1342_encode "$SUBJECT")"
-DATE=$(date '+%a, %d %b %Y %H:%M:%S %z')
-
-MAIL='HELO '"$HOSTNAME"'
+MAIL="$GREETING"'
 '"$SENDER_HEADER"'
 '"$RECIPIENTS_HEADERS"'
 DATA
@@ -178,4 +210,4 @@ Subject: '"$SUBJECT"'
 .
 QUIT'
 
-echo "$MAIL" | awk '{printf "%s\r\n", $0}' | nc "$HOST" "$PORT"
+echo "$MAIL" | replace_newlines | send_mail
