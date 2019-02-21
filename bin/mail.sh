@@ -37,7 +37,7 @@ print_usage() {
 # Prints the given error and optionally a usage message and exits:
 error_exit() {
   echo "Error: $1" >&2
-  if [ ! -z "$2" ]; then
+  if [ -n "$2" ]; then
     print_usage >&2
   fi
   exit 1

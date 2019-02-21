@@ -42,7 +42,7 @@ get_params() {
   printf '%s\n' "$params" "$secrets"
 
   next_token=$(echo "$response" | jq -re '.NextToken')
-  if [ ! -z "$next_token" ]; then
+  if [ -n "$next_token" ]; then
     get_params --starting-token "$next_token"
   fi
 }

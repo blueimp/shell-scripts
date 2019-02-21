@@ -65,7 +65,7 @@ err_file_log() {
 # Returns the defined log output:
 get_log() {
   printf %s "${1:-out}"
-  if [ "$1" = 'err' ] && [ ! -z "$ERRFILE" ] || [ ! -z "$LOGFILE" ]; then
+  if [ "$1" = 'err' ] && [ -n "$ERRFILE" ] || [ -n "$LOGFILE" ]; then
     printf _file
   fi
   printf _log

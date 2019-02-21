@@ -71,7 +71,7 @@ build() {
 		# Use the parent folder for the organization/user name:
 		organization="$(cd .. && normalize "$(basename "$PWD")")"
 	fi
-	if [ ! -z "$DOCKER_HUB" ]; then
+	if [ -n "$DOCKER_HUB" ]; then
 		organization="$DOCKER_HUB/$organization"
 	fi
 	local image

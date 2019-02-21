@@ -80,6 +80,6 @@ change_resource_record_sets() {
 }
 
 HOSTED_ZONE_ID=$(get_hosted_zone_id "$ROOT_DOMAIN")
-if [ ! -z "$HOSTED_ZONE_ID" ]; then
+if [ -n "$HOSTED_ZONE_ID" ]; then
   change_resource_record_sets "$HOSTED_ZONE_ID" "$CHANGE_BATCH"
 fi
