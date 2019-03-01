@@ -2,11 +2,11 @@
 
 #
 # Starts the Android virtual device with a writeable filesystem.
-# Starts the given AVD or by default the first in the AVD list.
-# If a hosts file is provided as argument, replaces /etc/hosts on the device
-# with the given file.
+# If the -hosts option is provided, replaces /etc/hosts on the device with the
+# given hosts file.
+# If no -avd option is given, starts the first AVD in the list.
 #
-# Usage: ./android-emulator-hosts.sh [-avd AVD] [hosts-file]
+# Usage: ./android-emulator.sh [-hosts file] [emulator options]
 #
 # Copyright 2019, Sebastian Tschan
 # https://blueimp.net
@@ -36,6 +36,14 @@ is_boot_completed() {
   test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
 }
 
+has_avd_arg() {
+  while test $# -gt 0; do
+    test "$1" = -avd && return 0
+    shift
+  done
+  return 1
+}
+
 update_hosts_file() {
   echo 'Waiting for device to be ready ...'
   adb wait-for-device
@@ -55,27 +63,18 @@ shutdown() {
 # Initiate a shutdown on SIGINT and SIGTERM:
 trap 'shutdown; exit' INT TERM
 
-if [ "$1" = "-avd" ]; then
-  AVD=$2
+if [ "$1" = -hosts ]; then
+  HOSTS_FILE=$2
   shift 2
-else
-  AVD=$(avd)
 fi
 
-HOSTS_FILE=$1
-
-if [ -n "$HOSTS_FILE" ]; then
-  # Test for arguments beginning with a dash:
-  if [ -z "${HOSTS_FILE%%-*}" ]; then
-    echo 'Usage:' "$0" '[-avd AVD] [hosts-file]' >&2
-    exit 1
-  elif [ ! -r "$HOSTS_FILE" ]; then
-    echo 'Not a readable file:' "$HOSTS_FILE" >&2
-    exit 1
-  fi
+if ! has_avd_arg "$@"; then
+  set -- -avd "$(avd)" "$@"
 fi
 
-emulator -avd "$AVD" -writable-system & PID=$!
+set -- -writable-system "$@"
+
+emulator "$@" & PID=$!
 
 if [ -n "$HOSTS_FILE" ]; then
   update_hosts_file "$HOSTS_FILE"
