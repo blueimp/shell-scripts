@@ -1,16 +1,15 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
-# Updates hostnames for the docker host IP or 127.0.0.1 in /etc/hosts.
+# Updates hostnames for the given IP or 127.0.0.1 in /etc/hosts.
 #
-# Usage: ./docker-hostnames.sh [-d] [config_file_1] [config_file_2] [...]
+# Usage: ./hostnames.sh [-i IP] [config_file_1] [config_file_2] [...]
 #
 # The default configuration file is "$PWD/hostnames".
 #
-# If the "-d" argument is given, the hostname entries are removed.
+# If the provided IP string is empty, the hostname entries are removed.
 #
-# Each hostname in the configuration file must be separated by a new line.
+# Each hostname in the configuration files must be separated by a new line.
 # Empty lines and lines starting with a hash (#) will be ignored.
 #
 # Copyright 2015, Sebastian Tschan
@@ -20,66 +19,54 @@
 # https://opensource.org/licenses/MIT
 #
 
-if [ "$1" = '-d' ]; then
-	# An empty DOCKER_HOST_IP signifies the removal of the hostname entries:
-	DOCKER_HOST_IP=''
-	shift
-elif [ -z "$DOCKER_HOST" ]; then
-	# Use 127.0.0.1 as default docker host IP:
-	DOCKER_HOST_IP='127.0.0.1'
+if [ "$1" = '-i' ]; then
+	IP=$2
+	shift 2
 else
-	# Extract the docker host IP from the DOCKER_HOST url:
-	DOCKER_HOST_IP="${DOCKER_HOST##*/}"
-	DOCKER_HOST_IP="${DOCKER_HOST_IP%:*}"
+	IP=127.0.0.1
 fi
 
 if [ $# = 0 ]; then
-	# Without arguments, use "$PWD/hostnames" as default configuration file:
+	# Use "$PWD/hostnames" as default configuration file:
 	set -- "$PWD/hostnames"
 fi
 
-# Normalizes according to docker-compose project naming rules:
-normalize() {
-	echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]//g'
+# Replaces everything but alphanumeric characters with dashes:
+sanitize() {
+	echo "$1" | sed 's/[^a-zA-Z0-9-]/-/g'
 }
 
 # Returns a marker to identify the hostname settings in /etc/hosts:
 marker() {
 	# Use the config file folder as project name:
-	local project
-	project="$(normalize "$(basename "$(cd "$(dirname "$1")" && pwd)")")"
-	local config_name
-	config_name="$(normalize "$(basename "$1")")"
+	project="$(sanitize "$(basename "$(cd "$(dirname "$1")" && pwd)")")"
+	config_name="$(sanitize "$(basename "$1")")"
 	echo "## $project $config_name"
 }
 
 # Updates hosts from STDIN with the mappings in the given config file:
 map_hostnames() {
-	local marker_base
 	marker_base="$(marker "$1")"
-	local marker_start="$marker_base start"
-	local marker_end="$marker_base end"
+	marker_start="$marker_base start"
+	marker_end="$marker_base end"
 	# Remove the current hostnames section:
 	sed "/$marker_start/,/$marker_end/d"
-	# Don't add any entries unless DOCKER_HOST_IP is set:
-	[ -z "$DOCKER_HOST_IP" ] && return
+	# Don't add any entries unless IP is set:
+	if [ -z "$IP" ]; then return; fi
 	# Add the new hostname settings:
 	echo "$marker_start"
-	local line
 	while read -r line; do
 		# Skip empty lines and lines starting with a hash (#):
 	  [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
-	  # Add each hostname entry with the $DOCKER_HOST_IP as mapping:
-	  printf '%s\t%s\n' "$DOCKER_HOST_IP" "$line"
+	  # Add each hostname entry with the $IP as mapping:
+	  printf '%s\t%s\n' "$IP" "$line"
 	done < "$1"
 	echo "$marker_end"
 }
 
 get_hosts_content() {
 	# Retrieve the current host settings:
-	local hosts_content
 	hosts_content="$(cat /etc/hosts)"
-	local file
 	for file; do
 		if [ ! -f "$file" ]; then
 			echo "$file is not a valid file." >&2
@@ -93,9 +80,8 @@ get_hosts_content() {
 
 # Updates /etc/hosts with the given content after confirmation from the user:
 update_hosts() {
-	local hosts_content="$1"
+	hosts_content="$1"
 	# Diff /etc/hosts with the new content:
-	local hosts_diff
 	hosts_diff="$(echo "$hosts_content" | diff /etc/hosts -)"
 	if [ ! "$hosts_diff" ]; then
 	  echo 'No updates to /etc/hosts required.'
@@ -108,7 +94,6 @@ update_hosts() {
 	echo 'Update /etc/hosts with the given changes?'
 	echo 'This will require Administrator privileges.'
 	echo 'Please type "y" if you wish to proceed.'
-	local confirmation
 	read -r confirmation
 	if [ "$confirmation" = "y" ]; then
 	  # Check if we have root access:
