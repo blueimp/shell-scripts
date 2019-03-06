@@ -11,12 +11,13 @@
 set -e
 
 cd "$1"
-mkdir thumb
+mkdir -p thumb
 
 TARGET_SIZE=${2:-120}
 SUBSAMPLE_SIZE=$((TARGET_SIZE*2))
 
 for image in *.jpg; do
+  if test -f "thumb/$image"; then continue; fi
   convert \
     -define jpeg:size="${SUBSAMPLE_SIZE}x${SUBSAMPLE_SIZE}" "$image" \
     -thumbnail "${TARGET_SIZE}x${TARGET_SIZE}^" \
