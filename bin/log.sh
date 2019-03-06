@@ -80,7 +80,7 @@ process() {
 
 # Returns a string with the quoted arguments:
 quote() {
-  args=''
+  args=
   for arg; do
     # Escape single quotes:
     arg="$(echo "$arg" | sed "s/'/'\\\\''/g")"

@@ -83,7 +83,7 @@ gsub() {
 # Parses the given config file and writes the env config:
 write_envconfig() {
   # Store variables to unset in a space-separated list:
-  unset_variables=''
+  unset_variables=
   # Set the platform dependent base64 decode argument:
   B64_DECODE_ARG="$(b64_decode_arg)"
   # Iterate over each line of the config file:

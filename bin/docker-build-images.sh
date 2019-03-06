@@ -121,7 +121,7 @@ NEWLINE='
 
 # Parses the arguments, finds Dockerfiles and starts the builds:
 init() {
-	args=''
+	args=
 	for arg; do
 		if [ -d "$arg" ]; then
 			# Search for Dockerfiles and add them to the list:

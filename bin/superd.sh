@@ -24,7 +24,7 @@
 #
 
 # The list of pids for the background processes:
-PIDS=''
+PIDS=
 
 # Runs the given command in a background process and stores the pid:
 run() {
