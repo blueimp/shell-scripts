@@ -100,7 +100,7 @@ build_images() {
   for file; do
     # Shift the arguments list to remove the current Dockerfile:
     shift
-    # Baisc check if the file is a valid Dockerfile:
+    # Basic check if the file is a valid Dockerfile:
     if ! grep '^FROM ' "$file"; then
       echo "Invalid Dockerfile: $file" >&2
       continue
