@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
 # Wrapper script to write environment variables in config files.
@@ -84,16 +83,15 @@ gsub() {
 # Parses the given config file and writes the env config:
 write_envconfig() {
   # Store variables to unset in a space-separated list:
-  local unset_variables=''
+  unset_variables=''
   # Set the platform dependent base64 decode argument:
-  local B64_DECODE_ARG
   B64_DECODE_ARG="$(b64_decode_arg)"
   # Iterate over each line of the config file:
   while read -r line; do
     # Skip empty lines and lines starting with a hash (#):
     [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
     # Extract the substring up to the first space as variable name:
-    local name="${line%% *}"
+    name="${line%% *}"
     # Check if the variable should be unset (no exclamation mark prefix):
     if [ "${name#!}" = "$name" ]; then
       # Store the name and its variants in the list of variables to unset:
@@ -103,10 +101,9 @@ write_envconfig() {
       name="${name#!}"
     fi
     # Extract the substring after the last space as file path:
-    local path="${line##* }"
+    path="${line##* }"
     # Check if the file exists and has a size greater than zero:
     if [ -s "$path" ]; then
-      local tmpfile
       tmpfile="$(mktemp "${TMPDIR:-/tmp}/$name.XXXXXXXXXX")"
       # Replace the placeholder with the environment variable:
       gsub "{{$name}}" "$(interpolate "$name")" < "$path" > "$tmpfile"

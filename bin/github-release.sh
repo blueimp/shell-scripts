@@ -101,7 +101,6 @@ upload_release_asset() {
 publish_release() {
   # shellcheck disable=SC2059
   data="$(printf "$RELEASE_TEMPLATE" "$TAG" "$TAG" "$PRE" false)"
-  # shellcheck disable=SC2059
   curl \
     --silent \
     --fail \

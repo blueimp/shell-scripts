@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
 # Checks if a given docker image exists.

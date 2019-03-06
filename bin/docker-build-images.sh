@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
 # Builds images for each Dockerfile found recursively in the given directory.
@@ -31,19 +30,16 @@ normalize() {
 
 # Build and tag the image based on the git branches in the current directory:
 build_versions() {
-	local image="$1"
+	image="$1"
 	shift
 	if [ ! -d '.git' ]; then
 		# Not a git repository, so simply build a "latest" image version:
 		docker build -t "$image" "$@" .
 		return $?
 	fi
-	local current_branch
 	current_branch=$(git rev-parse --abbrev-ref HEAD)
 	# Iterate over all branches:
-	local branches
 	branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
-	local branch
 	for branch in $branches; do
 		git checkout "$branch"
 		# Tag master as "latest":
@@ -60,13 +56,11 @@ build_versions() {
 
 # Builds an image for each git branch of the given Dockerfile directory:
 build() {
-	local cwd="$PWD"
-	local file
+	cwd="$PWD"
 	file="$(basename "$1")"
-	local dir
 	dir="$(dirname "$1")"
 	cd "$dir" || return 1
-	local organization="$DOCKER_ORG"
+	organization="$DOCKER_ORG"
 	if [ -z "$organization" ]; then
 		# Use the parent folder for the organization/user name:
 		organization="$(cd .. && normalize "$(basename "$PWD")")"
@@ -74,11 +68,9 @@ build() {
 	if [ -n "$DOCKER_HUB" ]; then
 		organization="$DOCKER_HUB/$organization"
 	fi
-	local image
 	# Use the current folder for the image name:
 	image="$organization/$(normalize "$(basename "$PWD")")"
 	# Check if the image depends on another image of the same organization:
-	local from
 	from=$(grep "^FROM $organization/" "$file" | awk '{print $2}')
 	# If it does, only build if the image is already available:
 	if [ -z "$from" ] || docker inspect "$from" > /dev/null 2>&1; then
@@ -86,7 +78,7 @@ build() {
 	else
 		echo "$image requires $from ..." >&2 && false
 	fi
-	local status=$?
+	status=$?
 	cd "$cwd" || return 1
 	return $status
 }
@@ -105,7 +97,6 @@ build_images() {
 		echo 'Could not resolve image dependencies.' >&2
 		return 1
 	fi
-	local file
 	for file; do
 		# Shift the arguments list to remove the current Dockerfile:
 		shift
@@ -130,8 +121,7 @@ NEWLINE='
 
 # Parses the arguments, finds Dockerfiles and starts the builds:
 init() {
-	local args=''
-	local arg
+	args=''
 	for arg; do
 		if [ -d "$arg" ]; then
 			# Search for Dockerfiles and add them to the list:

@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
 # Supervisor daemon to manage long running processes as a group.
@@ -47,7 +46,6 @@ startup() {
 
 # Returns all given processes and their descendants tree as flat list:
 collect() {
-  local pid
   for pid in "$@"; do
     printf ' %s' "$pid"
   	# shellcheck disable=SC2046
@@ -57,7 +55,6 @@ collect() {
 
 # Terminates the given list of processes:
 terminate() {
-  local pid
   for pid in "$@"; do
     # Terminate the given process, ignore stdout and stderr output:
     kill "$pid" > /dev/null 2>&1
@@ -74,7 +71,6 @@ shutdown() {
 
 # Monitors the started background processes until one of them exits:
 monitor() {
-  local pid
   while true; do
     for pid in $PIDS; do
       # Return if the given process is not running:

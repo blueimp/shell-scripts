@@ -1,5 +1,4 @@
 #!/bin/sh
-# shellcheck shell=dash
 
 #
 # Executes the given command and logs the output.
@@ -73,7 +72,6 @@ get_log() {
 
 # Processes stdin and logs each line:
 process() {
-  local log
   log=$(get_log "$1")
   while read -r line; do
     $log "$1" "$line"
@@ -82,7 +80,7 @@ process() {
 
 # Returns a string with the quoted arguments:
 quote() {
-  local args=""
+  args=''
   for arg; do
     # Escape single quotes:
     arg="$(echo "$arg" | sed "s/'/'\\\\''/g")"

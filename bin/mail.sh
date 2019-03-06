@@ -21,7 +21,6 @@ set -e
 HOST=localhost
 PORT=25
 USER=${USER:-user}
-# shellcheck disable=SC2169
 HOSTNAME=${HOSTNAME:-localhost}
 FROM="$USER <$USER@$HOSTNAME>"
 TO='test <test@example.org>'
