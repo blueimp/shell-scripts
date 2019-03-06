@@ -3,7 +3,7 @@
 #
 # Creates an S3 bucket with a website redirect rule and adds a Route53 alias.
 #
-# Requires aws and jq to be installed.
+# Requires aws CLI to be installed.
 # Redirects to the www subdomain by default.
 # Always redirects to an https URL.
 #
@@ -93,9 +93,9 @@ put_bucket_website() {
 }
 
 get_hosted_zone_id() {
-  aws route53 list-hosted-zones-by-name --dns-name "$1" --max-items 1 |
-    jq -r --arg name "$1." \
-    '.HostedZones[0] | select(.Name == $name) | .Id | ltrimstr("/hostedzone/")'
+  aws route53 list-hosted-zones-by-name --dns-name "$1" --max-items 1 \
+    --query "HostedZones[?Name == '$1.'].Id" --output text |
+    sed s,/hostedzone/,,
 }
 
 change_resource_record_sets() {
