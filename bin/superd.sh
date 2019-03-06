@@ -38,7 +38,7 @@ startup() {
     # Skip empty lines and lines starting with a hash (#):
     [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
     # Run the given command line:
-  	# shellcheck disable=SC2086
+    # shellcheck disable=SC2086
     run $line
   # Use the given config file as input:
   done < "$1"
@@ -48,7 +48,7 @@ startup() {
 collect() {
   for pid in "$@"; do
     printf ' %s' "$pid"
-  	# shellcheck disable=SC2046
+    # shellcheck disable=SC2046
     collect $(pgrep -P "$pid")
   done
 }

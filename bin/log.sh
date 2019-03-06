@@ -37,7 +37,7 @@
 
 # Combines the given arguments with a datetime and PID prefix:
 format() {
-	# shellcheck disable=SC2059
+  # shellcheck disable=SC2059
   echo "$($DATECMD) $(printf "$PIDFORM" $$) [$1] $2"
 }
 

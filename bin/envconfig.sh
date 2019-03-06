@@ -118,7 +118,7 @@ write_envconfig() {
   # Use the given config file as input:
   done < "$1"
   # Unset the given variables:
-	# shellcheck disable=SC2086
+  # shellcheck disable=SC2086
   unset $unset_variables
 }
 

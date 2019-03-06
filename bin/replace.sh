@@ -28,11 +28,11 @@ gsub() {
 
 # Global search and replace with the given search and replacement strings:
 replace() {
-	# In sed search patterns, the following characters have a special meaning:
-	# The opening square bracket, slash, backslash, star and the dot.
-	# Additionaly, the circumflex at the start and the dollar-sign at the end.
-	# Therefore, we escape those characters in the given search string:
-	gsub "$(echo "$1" | sed 's/[[/\*.]/\\&/g;s/^^/\\&/;s/$$/\\&/')" "$2"
+  # In sed search patterns, the following characters have a special meaning:
+  # The opening square bracket, slash, backslash, star and the dot.
+  # Additionaly, the circumflex at the start and the dollar-sign at the end.
+  # Therefore, we escape those characters in the given search string:
+  gsub "$(echo "$1" | sed 's/[[/\*.]/\\&/g;s/^^/\\&/;s/$$/\\&/')" "$2"
 }
 
 if [ $# = 3 ] && [ "$1" = '-r' ]; then
