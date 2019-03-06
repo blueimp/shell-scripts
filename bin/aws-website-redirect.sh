@@ -32,15 +32,18 @@ s3-website.us-east-2.amazonaws.com=Z2O1EMRO9K5GLX
 s3-website-us-east-1.amazonaws.com=Z3AQBSTGFYJSTF 
 s3-website-us-west-1.amazonaws.com=Z2F56UZL2M1ACD 
 s3-website-us-west-2.amazonaws.com=Z3BJ6K6RIION7M
-s3-website.ca-central-1.amazonaws.com=Z1QDHH18159H29
 s3-website.ap-south-1.amazonaws.com=Z11RGJOFQNVJUP
+s3-website.ap-northeast-3.amazonaws.com=Z2YQB5RD63NC85
 s3-website.ap-northeast-2.amazonaws.com=Z3W03O7B5YMIYP
 s3-website-ap-southeast-1.amazonaws.com=Z3O0J2DXBE1FTB
 s3-website-ap-southeast-2.amazonaws.com=Z1WCIGYICN2BYD
 s3-website-ap-northeast-1.amazonaws.com=Z2M4EHUR26P7ZW
+s3-website.ca-central-1.amazonaws.com=Z1QDHH18159H29
 s3-website.eu-central-1.amazonaws.com=Z21DNDUVLTQW6Q
 s3-website-eu-west-1.amazonaws.com=Z1BKCTXD74EZPE
 s3-website.eu-west-2.amazonaws.com=Z3GKZC51ZF0DB4
+s3-website.eu-west-3.amazonaws.com=Z3R1K369G5AVDG
+s3-website.eu-north-1.amazonaws.com=Z3BAZG2TWCNX0D
 s3-website-sa-east-1.amazonaws.com=Z7KQH4QJS55SO
 ' | grep "$REGION")
 
