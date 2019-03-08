@@ -15,19 +15,14 @@
 
 set -e
 
-# Set the timezone to UTC+0 (used by `git show` via `strftime` and `touch`):
+# Set the timezone to UTC so `git log` and `touch` do not diverge:
 export TZ=UTC0
 
 apply_commit_time() {
-  # Retrieve the latest commit ID for the given file:
-  local commit
-  commit="$(git rev-list -1 HEAD "$1")"
-  # Extract the commit author date in `touch -t` format (CCYYMMDDhhmm.ss):
-  local timestamp
-  timestamp=$(
-    git show --pretty=format:%ad --date=format-local:%Y%m%d%H%M.%S "$commit" |
-    head -n 1
-  )
+  # Check if this is a readable file:
+  if [ ! -r "$1" ]; then return; fi
+  # Extract the commit date for the file in `touch -t` format (CCYYMMDDhhmm.ss):
+  timestamp=$(git log -1 --format=%cd --date=format-local:%Y%m%d%H%M.%S -- "$1")
   # Set the modification time of the given file to the commit timestamp:
   touch -t "$timestamp" "$1"
 }
@@ -37,8 +32,4 @@ apply_commit_time() {
 # not available in POSIX shell. However, this allows us to handle any file name
 # which is valid on UNIX systems:
 git ls-tree -r -z --name-only HEAD -- "${1:-.}" | while IFS= read -d '' -r FILE
-do
-  if [ -r "$FILE" ]; then
-    apply_commit_time "$FILE"
-  fi
-done
+do apply_commit_time "$FILE"; done
