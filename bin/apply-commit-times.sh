@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # Sets the modification times of the given files and the files in the given
@@ -27,14 +27,30 @@ apply_commit_time() {
   fi
 }
 
+# Check if the shell supports the "-d" option for the `read` built-in:
+# shellcheck disable=SC2039
+if printf '%s\0' 1 2 | read -r -d '' 2>/dev/null; then
+  iterate() {
+    # Disable the internal field separator (IFS) and iterate over the null byte
+    # separated file paths using the "-d" option of the `read` built-in:
+    while IFS= read -r -d '' FILE; do apply_commit_time "$FILE"; done
+  }
+else
+  iterate() {
+    # Transform the null byte separated files paths into command-line arguments
+    # to the script itself via `xargs`.
+    # The system-defined command-line arguments constraints will limit the
+    # number of files that can be processed for a given directory, which should
+    # be below the number defined via "-n" option for xargs:
+    xargs -0 -n 100000 "$0"
+  }
+fi
+
 while [ $# -gt 0 ]; do
   # Is the argument a directory path?
   if [ -d "$1" ]; then
-    # The "-z" option of `git ls-tree` outputs NUL byte separated file paths,
-    # which can be iterated over with the "-d" option of the `read` built-in.
-    # Since this option not available in POSIX shell, bash is required:
-    git ls-tree -r -z --name-only HEAD -- "$1" | while IFS= read -d '' -r FILE
-    do apply_commit_time "$FILE"; done
+    # The "-z" option of `git ls-tree` outputs null byte separated file paths:
+    git ls-tree -r -z --name-only HEAD -- "$1" | iterate
   # Else is the argument a path to a readable file?
   elif [ -r "$1" ]; then
     apply_commit_time "$1"
