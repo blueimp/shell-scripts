@@ -9,6 +9,7 @@
 #
 # The default envconfig configuration file is "/usr/local/etc/envconfig.conf".
 # An alternate configuration file can be provided via -f option.
+# To read the configuration from STDIN, the placeholder "-" can be used.
 #
 # Each line of the configuration for envconfig must have the following format:
 # VARIABLE_NAME /absolute/path/to/config/file
@@ -40,12 +41,10 @@
 # https://opensource.org/licenses/MIT
 #
 
-# Exit immediately if a command exits with a non-zero status:
 set -e
 
 # Returns the platform dependent base64 decode argument:
 b64_decode_arg() {
-  # Determine the platform dependent base64 decode argument:
   if [ "$(echo 'eA==' | base64 -d 2> /dev/null)" = 'x' ]; then
     printf %s -d
   else
@@ -122,11 +121,13 @@ write_envconfig() {
   unset $unset_variables
 }
 
-# Check if the config file is provided via command line:
+# Write the environment config using the provided configuration file:
 if [ "$1" = "-f" ]; then
-  # Use the given config file to write the env config:
-  write_envconfig "$2"
-  # Shift the arguments list to remove the given -f option:
+  if [ "$2" = - ]; then
+    write_envconfig /dev/stdin
+  else
+    write_envconfig "$2"
+  fi
   shift 2
 else
   # Use the default config file to write the env config:

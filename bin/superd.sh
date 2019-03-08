@@ -3,18 +3,18 @@
 #
 # Supervisor daemon to manage long running processes as a group.
 # Terminates all remaining child processes as soon as one child exits.
-# Written as entrypoint service for multi-process docker containers.
 #
 # Usage: ./superd.sh [config_file]
 #
 # The default superd configuration file is "/usr/local/etc/superd.conf".
 # An alternate configuration file can be provided as first argument.
+# To read the configuration from STDIN, the placeholder "-" can be used.
 #
 # Each line of the superd configuration file must have the following format:
 # command [args...]
+# Empty lines and lines starting with a hash (#) will be ignored.
 # Each command will be run by superd as a background process.
 # If one command terminates, all commands will be terminated.
-# Empty lines and lines starting with a hash (#) will be ignored.
 #
 # Copyright 2015, Sebastian Tschan
 # https://blueimp.net
@@ -23,13 +23,22 @@
 # https://opensource.org/licenses/MIT
 #
 
-# The list of pids for the background processes:
+# The list of process IDs for the background processes:
 PIDS=
 
-# Runs the given command in a background process and stores the pid:
+# Runs the given command in a background process and stores the process ID:
 run() {
   "$@" &
   PIDS="$PIDS $!"
+}
+
+# Determines the config file:
+config() {
+  case "$1" in
+     -) echo /dev/stdin;;
+    '') echo /usr/local/etc/superd.conf;;
+     *) echo "$1";;
+  esac
 }
 
 # Runs commands defined in the given config file:
@@ -83,8 +92,8 @@ monitor() {
 # Initiate a shutdown on SIGINT and SIGTERM:
 trap 'shutdown; exit' INT TERM
 
-# Start the commands defined in the given or the default config file:
-startup "${1:-/usr/local/etc/superd.conf}" || exit $?
+# Start the commands with the given config:
+startup "$(config "$@")" || exit $?
 
 # Monitor the started background processes until one of them exits:
 monitor
