@@ -13,8 +13,6 @@
 
 set -e
 
-cd "$(dirname "$0")"
-
 # Colorize the output by default:
 if [ "$1" != '--no-color' ]; then
   c031='\033[0;31m' # red
